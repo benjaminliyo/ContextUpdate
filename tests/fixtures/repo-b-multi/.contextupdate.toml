@@ -1,0 +1,8 @@
+[meta]
+version = 1
+
+[[watch]]
+path     = "docs/plans/api-refactor.md"
+kind     = "plan"
+owns     = ["api shape", "error envelope"]
+severity = "high"

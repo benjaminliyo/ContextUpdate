@@ -1,0 +1,25 @@
+{
+  "name": "context-update",
+  "version": "0.1.0",
+  "description": "Claude Code skill plugin that detects and proposes edits when reusable-context files drift from decisions made in the current conversation.",
+  "license": "MIT",
+  "author": {
+    "name": "Benjamin Li",
+    "email": "benjaminliyo@gmail.com"
+  },
+  "keywords": [
+    "claude-code",
+    "skill",
+    "plugin",
+    "context",
+    "drift-detection",
+    "claude-md",
+    "agents-md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benjaminliyo/ContextUpdate.git"
+  },
+  "homepage": "https://github.com/benjaminliyo/ContextUpdate",
+  "private": true
+}

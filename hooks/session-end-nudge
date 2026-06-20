@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# SessionStart-planted self-reminder for context-update.
+# Claude Code does not (yet) expose a SessionEnd hook, so the nudge lives in
+# the model's working context from the first turn. The "compact" matcher in
+# hooks.json re-injects it after auto-compression.
+#
+# The nudge text itself lives in hooks/nudge.txt (single source of truth shared
+# with the OpenCode plugin, the Pi extension, and the Kimi nudge skill).
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NUDGE_FILE="${SCRIPT_DIR}/nudge.txt"
+
+if [ ! -f "$NUDGE_FILE" ]; then
+  # Fail loud rather than silently emit empty additional context.
+  echo "context-update: nudge file missing at $NUDGE_FILE" >&2
+  exit 1
+fi
+
+NUDGE="$(cat "$NUDGE_FILE")"
+
+# JSON-escape the block (same approach as superpowers/hooks/session-start).
+escape_for_json() {
+    local s="$1"
+    s="${s//\\/\\\\}"
+    s="${s//\"/\\\"}"
+    s="${s//$'\n'/\\n}"
+    s="${s//$'\r'/\\r}"
+    s="${s//$'\t'/\\t}"
+    printf '%s' "$s"
+}
+
+ESCAPED=$(escape_for_json "$NUDGE")
+
+# Emit the additional-context JSON in the shape the current runtime expects.
+# Cursor uses additional_context; Claude Code uses hookSpecificOutput.additionalContext;
+# others (Copilot CLI, generic SDK) use additionalContext.
+if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
+  printf '{\n  "additional_context": "%s"\n}\n' "$ESCAPED"
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
+  printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$ESCAPED"
+else
+  printf '{\n  "additionalContext": "%s"\n}\n' "$ESCAPED"
+fi
+
+exit 0

@@ -1,0 +1,134 @@
+# .contextupdate.toml — template
+#
+# Copy to `.contextupdate.toml` at your repo root and uncomment the blocks
+# you want. Everything here is optional — the skill works with zero config
+# via auto-discovery (conversation-derived + preloaded + slim probes).
+#
+# You generally do NOT need to edit this file by hand. During a /context-update
+# run, the skill will queue any `[[watch]]`, `[[ignore]]`, or `[[freeze]]`
+# blocks you accept (via `drop`, `freeze`, `watch`, `ignore` replies) and
+# write them here at the end with a single confirmation diff.
+#
+# Full schema reference:
+#   skills/context-update/references/config-schema.md
+# Discovery rules:
+#   skills/context-update/references/discovery-rules.md
+
+# ---------------------------------------------------------------------------
+# Schema version. Required if you set anything else. Bump only when the
+# skill releases a breaking schema change.
+# ---------------------------------------------------------------------------
+[meta]
+version = 1
+
+
+# ---------------------------------------------------------------------------
+# [[watch]]
+# Add a file (or annotate one auto-discovery already found) with extra
+# metadata. Use this for paths the skill can't predict.
+# ---------------------------------------------------------------------------
+
+# Example: annotate the project's main convention file.
+# [[watch]]
+# path     = "CLAUDE.md"
+# kind     = "convention"     # plan|convention|memory|personal|architecture|other
+# severity = "high"           # high|medium|low — overrides category default
+
+# Example: a plan file with topics it "owns". A conversation decision whose
+# subject matches an `owns` entry but is missing from this file becomes a
+# `missing-new-decision` finding.
+# [[watch]]
+# path     = "docs/plans/api-refactor.md"
+# kind     = "plan"
+# owns     = ["api shape", "error envelope"]
+# severity = "high"
+
+# Example: a non-standard rules file the probe list doesn't know about.
+# [[watch]]
+# path = "RULES.md"
+# kind = "convention"
+
+
+# ---------------------------------------------------------------------------
+# [[ignore]]
+# Drop matching paths from the watch list entirely. Globs supported.
+# ---------------------------------------------------------------------------
+
+# [[ignore]]
+# path = "docs/plans/legacy/*"
+
+# [[ignore]]
+# path = "**/draft-*.md"
+
+
+# ---------------------------------------------------------------------------
+# [[freeze]]
+# Keep the file in the enumerated watch list but never propose edits unless
+# the user invokes `/context-update --override-frozen` AND confirms per file.
+# Use for historical records, legal text, or anything that must not change.
+# ---------------------------------------------------------------------------
+
+# [[freeze]]
+# path   = "docs/legacy/*"
+# reason = "historical record"
+
+# [[freeze]]
+# path   = "LICENSE"
+# reason = "legal text"
+
+
+# ---------------------------------------------------------------------------
+# [[mirror]]   (deferred to v0.2 — schema slot reserved)
+# Synchronize a section in one file from a source elsewhere. Parsed but
+# inert in v0.1.0.
+# ---------------------------------------------------------------------------
+
+# [[mirror]]
+# target  = "CLAUDE.md#recent-decisions"
+# source  = "CHANGELOG.md:top-5"
+# markers = ["<!-- recent-decisions:start -->", "<!-- recent-decisions:end -->"]
+
+
+# ---------------------------------------------------------------------------
+# [discovery]
+# Toggles for the five discovery sources. Defaults shown.
+# ---------------------------------------------------------------------------
+
+[discovery]
+# Collect candidate paths from this session's tool calls, @file mentions,
+# tool results, and prose. Primary signal for project-specific files.
+conversation_derived        = true
+
+# Drop conversation-derived rows below this confidence level.
+# Levels: opened | force-loaded | referenced | mentioned
+#   opened       — agent ran Read/Edit/Write on it (highest)
+#   force-loaded — `@file` mention
+#   referenced   — appeared in a tool result (Glob/Grep/listing)
+#   mentioned    — prose-only mention (lowest; usually skipped)
+conversation_min_confidence = "referenced"
+
+# Include files the harness force-loads into the system prompt
+# (typically CLAUDE.md / AGENTS.md at the project root).
+preloaded_context           = true
+
+# Include the slim static probe list (CLAUDE.md, AGENTS.md, GEMINI.md,
+# .cursor/rules/*.mdc, .cursorrules, .clinerules, .windsurfrules,
+# .github/copilot-instructions.md, plus user-global if enabled).
+# Turn off to rely purely on conversation-derived + preloaded + config.
+wellknown_probes            = true
+
+# Follow outbound references (markdown links, @file, TOML/YAML paths)
+# from anything the other sources discovered.
+follow_references           = true
+
+# Maximum hops when following references. Cycle-safe via a visited set.
+follow_depth                = 2
+
+# Include user-global paths (~/.claude/CLAUDE.md, ~/.claude/agents/*.md,
+# ~/.codex/AGENTS.md). Findings there carry an "outside project root —
+# confirm scope" warning before any apply. Default is true; set false if
+# you don't want this project to ever propose edits to personal files.
+include_user_global         = true
+
+# Walk from cwd up to the git root, probing at each level.
+include_ancestors           = true

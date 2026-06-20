@@ -1,0 +1,34 @@
+{
+  "name": "context-update",
+  "description": "Detect and propose edits when reusable-context files (CLAUDE.md, AGENTS.md, plans, personal instructions) drift from decisions made in the current conversation",
+  "version": "0.1.0",
+  "author": {
+    "name": "Benjamin Li",
+    "email": "benjaminliyo@gmail.com"
+  },
+  "homepage": "https://github.com/benjaminliyo/ContextUpdate",
+  "repository": "https://github.com/benjaminliyo/ContextUpdate",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "context",
+    "drift-detection",
+    "agents-md",
+    "memory",
+    "conventions"
+  ],
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks-codex.json",
+  "interface": {
+    "displayName": "Context Update",
+    "shortDescription": "Detect drift between conversation decisions and reusable-context files",
+    "longDescription": "Use Context Update at session wrap-up, after a preference reversal, or whenever a conversation has produced decisions that may contradict statements written in CLAUDE.md, AGENTS.md, ~/.claude/CLAUDE.md, implementation plans, or personal instructions. The skill enumerates watched files, extracts conversation decisions, surfaces contradictions and stale statements, and proposes per-file edits — never auto-applying.",
+    "developerName": "Benjamin Li",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/benjaminliyo/ContextUpdate"
+  }
+}

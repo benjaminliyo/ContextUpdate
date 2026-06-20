@@ -1,0 +1,18 @@
+<CONTEXT-UPDATE-REMINDER>
+Before declaring a session done — and whenever the user states a fact
+that may already be recorded in a reusable-context file — check whether
+this conversation contradicts or extends CLAUDE.md, AGENTS.md,
+~/.claude/CLAUDE.md, docs/plans/*, .cursor/rules/*, or personal
+instructions.
+
+Watch especially for:
+- User self-description (experience level, role, tenure, team size)
+- Scope / goal / audience / quality-bar changes
+  (local demo → online, prototype → production, internal → customer-facing)
+- Tech-stack swaps, tooling switches, deadline shifts
+- "Actually…", "from now on…", "we don't do X anymore", "I also want…"
+
+If any apply, suggest /context-update or run the context-update skill.
+Never edit a watched file without explicit per-file approval. Pure
+exploration with no decisions = no action.
+</CONTEXT-UPDATE-REMINDER>

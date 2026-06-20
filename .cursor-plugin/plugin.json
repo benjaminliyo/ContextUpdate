@@ -1,0 +1,23 @@
+{
+  "name": "context-update",
+  "displayName": "Context Update",
+  "description": "Detect and propose edits when reusable-context files drift from decisions made in the current conversation",
+  "version": "0.1.0",
+  "author": {
+    "name": "Benjamin Li",
+    "email": "benjaminliyo@gmail.com"
+  },
+  "homepage": "https://github.com/benjaminliyo/ContextUpdate",
+  "repository": "https://github.com/benjaminliyo/ContextUpdate",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "context",
+    "drift-detection",
+    "agents-md",
+    "memory",
+    "conventions"
+  ],
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks-cursor.json"
+}

@@ -1,0 +1,10 @@
+# Local Claude Code settings (per-user)
+.claude/settings.local.json
+
+# Build artifacts (regenerate via scripts/build-claudeai-zip.sh)
+dist/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp

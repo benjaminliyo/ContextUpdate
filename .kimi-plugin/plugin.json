@@ -1,0 +1,36 @@
+{
+  "name": "context-update",
+  "version": "0.1.0",
+  "description": "Detect and propose edits when reusable-context files (CLAUDE.md, AGENTS.md, plans, personal instructions) drift from decisions made in the current conversation.",
+  "author": {
+    "name": "Benjamin Li",
+    "email": "benjaminliyo@gmail.com"
+  },
+  "homepage": "https://github.com/benjaminliyo/ContextUpdate",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "context",
+    "drift-detection",
+    "agents-md",
+    "memory",
+    "conventions"
+  ],
+  "skills": "./skills/",
+  "sessionStart": {
+    "skill": "context-update-nudge"
+  },
+  "skillInstructions": "Kimi Code tool mapping for the context-update skill:\n\n- When the skill says to ask the user to disambiguate (e.g. Project vs Personal context blocks on no-fs runtimes) or to confirm an Apply? decision, call Kimi Code's `AskUserQuestion` tool with 1 question and 2-4 concrete options. Put the recommended option (usually the safest non-destructive choice) first with `(Recommended)`.\n- When the skill refers to `TodoWrite`, use Kimi Code's `TodoList` tool.\n- When the skill refers to the `Skill` tool (e.g. \"invoke the context-update skill\"), use Kimi Code's native `Skill` tool.\n- When the skill asks to dispatch a subagent (rare for context-update; only used for parallel file inspection), call `Agent` with `subagent_type: \"explore\"` for read-only scans and `subagent_type: \"coder\"` only if a follow-up edit subagent is required. Never pass `general-purpose`.\n- Use Kimi Code's `Read`, `Write`, `Edit`, `Bash`, `Grep`, `Glob`, `FetchURL`, `WebSearch`, and MCP tools by their actual exposed names. For \"read a file fresh\" use `Read`; for \"apply the approved diff\" use `Edit`; for \"create the new `.contextupdate.toml`\" use `Write`.\n- For the Step 7 config write, re-read `.contextupdate.toml` with `Read` before applying any `Edit` — the iron law against blind writes applies to the config file too.\n- Never modify a watched context file without an explicit per-file `y` / `apply N` / `apply all` reply from the user, regardless of which tool you would otherwise use.",
+  "interface": {
+    "displayName": "Context Update",
+    "shortDescription": "Detect drift between conversation decisions and reusable-context files",
+    "longDescription": "Use Context Update at session wrap-up, after a preference reversal, or whenever a conversation has produced decisions that may contradict statements written in CLAUDE.md, AGENTS.md, ~/.claude/CLAUDE.md, implementation plans, or personal instructions. The skill enumerates watched files, extracts conversation decisions, surfaces contradictions and stale statements, and proposes per-file edits — never auto-applying.",
+    "developerName": "Benjamin Li",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/benjaminliyo/ContextUpdate"
+  }
+}
