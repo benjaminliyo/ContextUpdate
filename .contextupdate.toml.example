@@ -4,10 +4,14 @@
 # you want. Everything here is optional — the skill works with zero config
 # via auto-discovery (conversation-derived + preloaded + slim probes).
 #
-# You generally do NOT need to edit this file by hand. During a /context-update
-# run, the skill will queue any `[[watch]]`, `[[ignore]]`, or `[[freeze]]`
-# blocks you accept (via `drop`, `freeze`, `watch`, `ignore` replies) and
-# write them here at the end with a single confirmation diff.
+# You generally do NOT need to edit this file by hand. Two paths to update it:
+#   1. During a /context-update run, the skill queues any `[[watch]]`,
+#      `[[ignore]]`, or `[[freeze]]` blocks you accept (via `drop`, `freeze`,
+#      `watch`, `ignore` replies) and writes them here with one confirmation.
+#   2. Between runs, `/context-update-config watch add <path>` (and the
+#      `watch drop`, `ignore add`, `ignore drop`, `list` siblings) edit
+#      this file directly without running the drift check. See
+#      commands/context-update-config.md.
 #
 # Full schema reference:
 #   skills/context-update/references/config-schema.md
@@ -113,7 +117,8 @@ preloaded_context           = true
 
 # Include the slim static probe list (CLAUDE.md, AGENTS.md, GEMINI.md,
 # .cursor/rules/*.mdc, .cursorrules, .clinerules, .windsurfrules,
-# .github/copilot-instructions.md, plus user-global if enabled).
+# .github/copilot-instructions.md, CHANGELOG.md, HISTORY.md, CHANGES.md,
+# NEWS.md, RELEASES.md, plus user-global if enabled).
 # Turn off to rely purely on conversation-derived + preloaded + config.
 wellknown_probes            = true
 

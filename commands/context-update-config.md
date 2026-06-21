@@ -34,10 +34,15 @@ Both modes route to the same logic below.
 ## Subcommands
 
 ### `list`
-Read `.contextupdate.toml` (treat absence as empty config) and print:
+Read `.contextupdate.toml` and print:
 - All `[[watch]]` entries with their `kind` and `severity` if set
 - All `[[ignore]]` entries
 - All `[[freeze]]` entries with their `reason`
+
+If `.contextupdate.toml` does not exist, print a one-line note pointing
+to `.contextupdate.toml.example` as a template (the skill still works
+with zero config via auto-discovery — config is optional). Do not
+create the file from `list`; it's read-only.
 
 Format as a single readable block. No file write.
 
@@ -107,6 +112,9 @@ Format as a single readable block. No file write.
 - Does NOT guess `kind`, `owns`, or `severity` for new `[[watch]]`
   entries. The user can hand-edit the TOML later for stronger
   annotations.
+- Does NOT copy from `.contextupdate.toml.example`. Mutators create a
+  minimal config from scratch (`[meta]` + the new entry). The example
+  file is a hand-edit reference only.
 
 ## Schema reference
 
