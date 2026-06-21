@@ -1,6 +1,9 @@
 # Local Claude Code settings (per-user)
 .claude/settings.local.json
 
+# Per-user context-update config (the .example file is the committed template)
+.contextupdate.toml
+
 # Build artifacts (regenerate via scripts/build-claudeai-zip.sh)
 dist/
 

@@ -7,7 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-06-21
+
 ### Added
+- `skills/context-update-config/SKILL.md` — sibling skill for one-shot
+  `.contextupdate.toml` edits, so skill-only runtimes (Codex, Cursor,
+  Kimi, OpenCode, Pi) can expose `/context-update-config`. Claude Code
+  keeps the existing `commands/context-update-config.md` as a thin
+  alias.
+- `tests/verify-codex-surface.ps1` — regression guard for the sibling
+  skill + Codex manifest version bump.
+
+### Changed
+- `.codex-plugin/`, `.cursor-plugin/`, `.kimi-plugin/` switched the
+  `skills` field from `"./skills/"` wildcard to explicit arrays. This
+  excludes `context-update-project` (web-only) from code-agent
+  distributions. `.claude-plugin/plugin.json` adds the new skill to
+  its existing explicit list.
+- All manifests bumped `0.1.0` → `0.1.1`.
+- `CLAUDE.md` corrected: Codex/Cursor/Kimi/OpenCode/Pi enumerate slash
+  commands from `skills/`, not `commands/*.md`. Sibling skill recorded
+  as a layout invariant.
+
+### Known limitations
+- `.opencode/plugins/context-update.js` and
+  `.pi/extensions/context-update.ts` register `skills/` wholesale via
+  code, so `context-update-project` (web-only) still leaks into those
+  runtimes. Deferred.
+
+## [0.1.0] — 2026-06-20
+
+### Added
+- Initial MVP scaffold.
+- `skills/context-update/` with SKILL.md and references for discovery,
+  detection workflow, config schema, report format, and rationalization
+  table.
+- `/context-update` slash command.
+- SessionStart-planted self-reminder (`hooks/session-end-nudge`) and
+  Windows-compatible `run-hook.cmd` shim.
+- `.contextupdate.toml` schema (TOML; version-gated).
+- `.contextupdate.toml.example` template at the repo root.
+- Three pressure scenarios (config flip, plan supersession, personal vs
+  project) with fixtures and a grading harness.
 - "Per-file copy-paste" section emitted after the report summary,
   grouping approved replacements by file. Always emitted; on no-write
   runtimes (Claude.ai) it's the deliverable, elsewhere it's a convenience
@@ -59,7 +100,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   replies at the Step 1 watch-list prompt; `ignore` and `freeze` added to
   the per-finding `Apply?` reply set. Queued edits persist in a new
   Step 7 with a single diff confirmation.
-- `.contextupdate.toml.example` template at the repo root.
 - New `[discovery]` toggles: `conversation_derived`,
   `conversation_min_confidence`, `preloaded_context`, `wellknown_probes`.
 
@@ -104,29 +144,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `package.json`, `LICENSE`) now points at `benjaminliyo/ContextUpdate`
   with `Benjamin Li <benjaminliyo@gmail.com>` as the author.
 
-### Stretch / not-yet-done
-- Wire `tests/run-skill-tests.sh` to a headless `claude` CLI smoke test
-  for the three pressure scenarios. Today the harness is a manual
-  scaffold (human runs the prompts in a real session and grades against
-  the RED/GREEN rubric). Headless CI run would catch regressions on the
-  skill body without a human in the loop.
-
-## [0.1.0] — 2026-06-19
-
-### Added
-- Initial MVP scaffold.
-- `skills/context-update/` with SKILL.md and references for discovery,
-  detection workflow, config schema, report format, and rationalization
-  table.
-- `/context-update` slash command.
-- SessionStart-planted self-reminder (`hooks/session-end-nudge`) and
-  Windows-compatible `run-hook.cmd` shim.
-- `.contextupdate.toml` schema (TOML; version-gated).
-- Three pressure scenarios (config flip, plan supersession, personal vs
-  project) with fixtures and a grading harness.
-
 ### Deferred
 - `[[mirror]]` block support (schema slot is reserved).
 - `/context-update FILE1 FILE2 ...` explicit file args.
 - Default-off `include_user_global` (currently default-on; revisit after
   user feedback).
+- Wire `tests/run-skill-tests.sh` to a headless `claude` CLI smoke test
+  for the three pressure scenarios. Today the harness is a manual
+  scaffold (human runs the prompts in a real session and grades against
+  the RED/GREEN rubric). Headless CI run would catch regressions on the
+  skill body without a human in the loop.

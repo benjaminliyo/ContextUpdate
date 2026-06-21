@@ -169,6 +169,120 @@ message.
 For the manifest/hook matrix and a per-runtime troubleshooting table,
 see [`docs/installing-per-runtime.md`](docs/installing-per-runtime.md).
 
+## Update
+
+When a new version ships (manifest version bumped), refresh your local
+install. The flow differs per runtime.
+
+**Claude Code** (local marketplace)
+
+```
+/plugin marketplace update context-update-dev
+/reload-plugins
+```
+
+`/plugin marketplace update` refreshes the marketplace metadata from
+your local path; `/reload-plugins` applies the new version without a
+session restart. If the new version doesn't appear, open `/plugin` →
+**Marketplaces** → select `context-update-dev` → **Enable auto-update**
+(local marketplaces have auto-update disabled by default). Verify with
+`/plugin list` or the **Installed** tab.
+
+**Claude.ai** (web / desktop)
+
+Rebuild the slim project zip (default for Claude.ai-only users).
+
+*Git Bash / macOS Terminal / Linux* (requires `python3` on PATH):
+
+```bash
+bash scripts/build-claudeai-project-zip.sh
+```
+
+*PowerShell on Windows*:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\build-claudeai-project-zip.ps1
+```
+
+Then in Customize → Skills, delete the old `context-update-project`
+skill and upload the new zip (Claude.ai won't merge — old and new
+can't co-exist).
+
+For the full coding-agent variant (cross-runtime users), substitute
+`build-claudeai-zip.{sh,ps1}` and the skill name `context-update`.
+
+**Codex**
+
+```
+codex plugins upgrade context-update    # single plugin
+codex plugins upgrade --all             # everything
+```
+
+Restart the Codex session for the new skill body to load (skill
+metadata refreshes on next launch).
+
+**Cursor**
+
+If the plugin was added via a team marketplace, toggle **Enable Auto
+Refresh** on the marketplace (Cursor will pick up version bumps
+automatically). Otherwise, re-import the repository URL through the
+plugin source UI, then run **Developer: Reload Window**.
+
+**Kimi Code**
+
+```
+/plugins
+```
+
+The plugin manager shows installed plugins with an
+`update <local> → <latest>` indicator on any that have a newer
+version. Select the entry, press Enter to update, then `/reload` to
+apply (or `/new` for a fresh session).
+
+**OpenCode**
+
+OpenCode runs `bun install` at startup, so for git-source plugins
+(like our `opencode.json` entry), a restart pulls the latest commit.
+To force a refresh of plugin deps:
+
+```
+opencode upgrade        # CAVEAT: known to update the binary but skip plugins
+```
+
+For automatic plugin updates, add `opencode-plugin-auto-update` to
+your plugin array — it polls for new versions and writes them back to
+`opencode.json`.
+
+**Pi**
+
+```
+pi update --extensions                                   # all extensions
+pi update git:github.com/benjaminliyo/ContextUpdate      # this one only
+```
+
+Pi's update command pulls the latest from the source ref.
+
+**Gemini CLI**
+
+```
+gemini extensions update context-update    # single
+gemini extensions update                   # all user-scope
+```
+
+Must be run outside the interactive CLI session; restart the CLI for
+the new skill body to load.
+
+**Copilot CLI**
+
+```
+gh skill update
+```
+
+Uses provenance metadata (source repo, ref, tree SHA) written into
+`SKILL.md` frontmatter at install time. For manual
+`~/.agents/skills/` copies, re-copy the new `skills/context-update/`
+directory and restart.
+
 ## Use
 
 - **Manual:** run `/context-update` whenever you want to audit the watched
