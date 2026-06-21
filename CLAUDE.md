@@ -25,6 +25,9 @@ working instructions for contributing to this repo.
   Windows auto-detection rewrites `.sh` commands to `bash <cmd>`.
 - `hooks/run-hook.cmd` is a polyglot: cmd.exe on Windows, bash everywhere
   else. Both halves must stay in sync with the superpowers reference.
+- `commands/context-update-config.md` — orthogonal TOML editor. Must NOT
+  invoke the skill body. Auto-discovered alongside `commands/context-update.md`
+  by Claude Code and Codex; zero plugin.json wiring.
 
 ## Tests
 
@@ -52,6 +55,7 @@ used and add a row to `references/rationalization-table.md`.
 | Report template | `references/report-format.md` |
 | Loopholes | `references/rationalization-table.md` |
 | Worked examples | `references/examples/*.md` |
+| One-shot config edits | `commands/context-update-config.md` |
 
 ## Do NOT
 
