@@ -4,6 +4,12 @@ TOML, hand-editable, lives at the repo root. Optional — the skill works with
 zero config via auto-discovery. The config layers on top of (and can override)
 auto-discovery.
 
+For one-shot edits without hand-editing TOML, see
+`commands/context-update-config.md` — provides `watch add/drop` and
+`ignore add/drop` as a slash command (Claude Code, Codex, and any
+runtime that auto-discovers `commands/`) or natural-language phrasing
+on other runtimes.
+
 ## Why TOML
 
 - Hand-edited by humans more often than by code.
