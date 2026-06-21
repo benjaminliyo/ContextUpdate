@@ -1,7 +1,7 @@
 {
   "name": "context-update",
   "description": "Detect and propose edits when reusable-context files (CLAUDE.md, AGENTS.md, plans, personal instructions) drift from decisions made in the current conversation",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": {
     "name": "Benjamin Li",
     "email": "benjaminliyo@gmail.com"
@@ -17,7 +17,11 @@
     "memory",
     "conventions"
   ],
-  "skills": "./skills/",
+  "skills": [
+    "./skills/context-update",
+    "./skills/context-update-nudge",
+    "./skills/context-update-config"
+  ],
   "hooks": "./hooks/hooks-codex.json",
   "interface": {
     "displayName": "Context Update",

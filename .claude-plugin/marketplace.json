@@ -9,7 +9,7 @@
     {
       "name": "context-update",
       "description": "Detect and propose edits when reusable-context files drift from decisions made in the current conversation",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "source": "./",
       "author": {
         "name": "Benjamin Li",
