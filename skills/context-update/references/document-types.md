@@ -23,7 +23,7 @@ the apply step (Step 6).
 ## Classification signals, in priority order
 
 1. **Filename patterns** (strongest signal)
-   - `CHANGELOG*`, `RELEASE-NOTES*`, `HISTORY*`, `CHANGES*` → `changelog`
+   - `CHANGELOG*`, `RELEASE-NOTES*`, `RELEASES*`, `HISTORY*`, `CHANGES*`, `NEWS*` → `changelog`
    - `README*` → `readme`
    - `TODO*`, `TASKS*`, `*-todo.md`, `*-tasks.md` → `tasks`
    - `ARCHITECTURE*`, `DESIGN*` → `architecture`

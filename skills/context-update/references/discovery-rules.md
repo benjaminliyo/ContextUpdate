@@ -112,6 +112,10 @@ config.
 - `.clinerules`
 - `.windsurfrules`
 - `.github/copilot-instructions.md`
+- `CHANGELOG.md`, `HISTORY.md`, `CHANGES.md`, `NEWS.md`, `RELEASES.md`
+  (common changelog filenames — append-by-default per
+  `document-types.md`; off-name files like `docs/version-log.md` are
+  picked up via conversation-derived discovery or `[[watch]]` config)
 
 ### User-global (only when `include_user_global = true`)
 - `~/.claude/CLAUDE.md`
