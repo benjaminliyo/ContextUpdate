@@ -214,8 +214,7 @@ For the full coding-agent variant (cross-runtime users), substitute
 **Codex**
 
 ```
-codex plugins upgrade context-update    # single plugin
-codex plugins upgrade --all             # everything
+codex plugin marketplace upgrade context-update-dev
 ```
 
 Restart the Codex session for the new skill body to load (skill
