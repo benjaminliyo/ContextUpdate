@@ -118,7 +118,7 @@ Then in Claude.ai:
 | `Compress-Archive : The term … is not recognized` (PowerShell) | PowerShell < 5.0. Upgrade to Windows PowerShell 5.1 (ships with Windows 10+) or install PowerShell 7. |
 | Claude.ai upload fails: `Zip file contains path with invalid characters` | The zip has backslash-separated entry names. Caused by Windows PowerShell 5.1's `Compress-Archive`. **The `.ps1` shipped here avoids this** by using `System.IO.Compression.ZipArchive` directly with forced forward slashes. If you built the zip with some other tool, rebuild with the supplied script — or open the zip in 7-Zip / WinRAR and check that entry names use `/`, not `\`. |
 | `skill source not found at …/skills/context-update` | You're not in the repo root. `cd` there first. |
-| Zip uploads to Claude.ai but the skill doesn't appear | Confirm the zip's top-level entry is `context-update/SKILL.md` (both scripts enforce this). Unzip locally to verify. |
+| Zip uploads to Claude.ai but the skill doesn't appear | Confirm the zip's top-level entry matches the variant: `context-update/SKILL.md` for the full skill, or `context-update-project/SKILL.md` for the slim Claude.ai project skill. Each builder script enforces its own layout. Unzip locally to verify. |
 
 ### Invocation
 
