@@ -39,6 +39,10 @@ if ($hookJson.hookSpecificOutput.additionalContext -notmatch "<CONTEXT-UPDATE-RE
     throw "Codex SessionStart hook additionalContext must include the reminder marker"
 }
 
+if ($hookJson.additionalContext -notmatch "<CONTEXT-UPDATE-REMINDER>") {
+    throw "Codex SessionStart hook must also emit top-level additionalContext"
+}
+
 $launcherPath = Join-Path $Root "hooks/codex-launcher.cmd"
 $launcherOutput = & cmd /c $launcherPath
 if ($LASTEXITCODE -ne 0) {
@@ -69,6 +73,10 @@ if (Test-Path -LiteralPath $gitBash) {
     $bashJson = $bashOutput | ConvertFrom-Json
     if ($bashJson.hookSpecificOutput.hookEventName -ne "SessionStart") {
         throw "Codex launcher bash branch must emit hookSpecificOutput.hookEventName = SessionStart"
+    }
+
+    if ($bashJson.additionalContext -notmatch "<CONTEXT-UPDATE-REMINDER>") {
+        throw "Codex launcher bash branch must also emit top-level additionalContext"
     }
 }
 

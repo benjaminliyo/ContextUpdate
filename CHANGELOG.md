@@ -24,6 +24,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   SessionStart hook output, including literal marker presence, nested
   `hookSpecificOutput.additionalContext`, the Windows launcher branch,
   and the bash launcher branch when Git Bash is installed.
+- Codex SessionStart hook output now includes both top-level
+  `additionalContext` and nested `hookSpecificOutput.additionalContext`
+  for Codex-like environments. This keeps the previously verified nested
+  shape while covering Codex builds that complete the hook but appear to
+  ignore the nested-only payload.
 - Codex auto wrap-up nudge now reaches Codex on Linux/macOS, not just
   Windows. `hooks/hooks-codex.json` invokes a new
   `hooks/codex-launcher.cmd` polyglot: on Windows cmd.exe runs the

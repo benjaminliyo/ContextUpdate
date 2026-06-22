@@ -59,7 +59,9 @@ function ConvertTo-JsonStringLiteral {
 
 # Keep '<CONTEXT-UPDATE-REMINDER>' literal in stdout. PowerShell 7's
 # ConvertTo-Json escapes it as \u003c...\u003e, and Codex's hook injection
-# path may preserve that escaped text in the model context.
+# path may preserve that escaped text in the model context. Emit both the
+# nested and flat context keys because Codex hook builds have differed on
+# which shape they honor.
 $escapedNudge = ConvertTo-JsonStringLiteral -Value $nudge
-[Console]::Out.WriteLine('{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"' + $escapedNudge + '"}}')
+[Console]::Out.WriteLine('{"additionalContext":"' + $escapedNudge + '","hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"' + $escapedNudge + '"}}')
 exit 0
