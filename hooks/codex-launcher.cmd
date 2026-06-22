@@ -15,5 +15,10 @@ CMDBLOCK
 # on Linux/macOS, and the bash script already emits the correct nested
 # hookSpecificOutput.additionalContext shape when PLUGIN_ROOT is set
 # (which Codex does).
+case ":$PATH:" in
+  *:/usr/bin:*) ;;
+  *) [ -d /usr/bin ] && export PATH="/usr/bin:$PATH" ;;
+esac
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-exec bash "${SCRIPT_DIR}/session-end-nudge"
+exec "${BASH:-bash}" "${SCRIPT_DIR}/session-end-nudge"

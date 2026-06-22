@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Fixed
+- Codex SessionStart nudge now preserves the literal
+  `<CONTEXT-UPDATE-REMINDER>` marker on Windows. PowerShell 7's
+  `ConvertTo-Json` escaped `<`, `>`, and `'` as `\u003c`, `\u003e`,
+  and `\u0027`; Codex's hook context path can preserve that escaped
+  text, so the model never sees the literal marker. The PowerShell hook
+  now writes compact JSON with a small JSON string escaper that leaves
+  the marker literal while still escaping newlines, quotes, backslashes,
+  and control characters.
+- `hooks/codex-launcher.cmd` Unix branch no longer assumes `dirname` or
+  `bash` are already on `PATH`. It prepends `/usr/bin` when available
+  and execs the current bash binary via `$BASH`, matching the
+  self-contained PATH repair already present in `hooks/session-end-nudge`.
+- `tests/verify-codex-surface.ps1` now regression-tests the Codex
+  SessionStart hook output, including literal marker presence, nested
+  `hookSpecificOutput.additionalContext`, the Windows launcher branch,
+  and the bash launcher branch when Git Bash is installed.
 - Codex auto wrap-up nudge now reaches Codex on Linux/macOS, not just
   Windows. `hooks/hooks-codex.json` invokes a new
   `hooks/codex-launcher.cmd` polyglot: on Windows cmd.exe runs the

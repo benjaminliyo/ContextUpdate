@@ -31,14 +31,35 @@ if (-not (Test-Path -LiteralPath $nudgePath)) {
 # in PowerShell 5.1, which Codex would reject.
 $nudge = [System.IO.File]::ReadAllText($nudgePath)
 
-$payload = [ordered]@{
-    hookSpecificOutput = [ordered]@{
-        hookEventName     = 'SessionStart'
-        additionalContext = $nudge
+function ConvertTo-JsonStringLiteral {
+    param([Parameter(Mandatory = $true)][string]$Value)
+
+    $builder = [System.Text.StringBuilder]::new()
+    foreach ($char in $Value.ToCharArray()) {
+        switch ($char) {
+            '\' { [void]$builder.Append('\\') }
+            '"' { [void]$builder.Append('\"') }
+            "`b" { [void]$builder.Append('\b') }
+            "`f" { [void]$builder.Append('\f') }
+            "`n" { [void]$builder.Append('\n') }
+            "`r" { [void]$builder.Append('\r') }
+            "`t" { [void]$builder.Append('\t') }
+            default {
+                if ([int][char]$char -lt 0x20) {
+                    [void]$builder.Append(('\u{0:x4}' -f [int][char]$char))
+                } else {
+                    [void]$builder.Append($char)
+                }
+            }
+        }
     }
+
+    $builder.ToString()
 }
 
-# -Compress avoids PowerShell 5.1's wide-indented JSON; Codex parses either,
-# but compressed output is one line and easier to log/diff.
-$payload | ConvertTo-Json -Depth 5 -Compress
+# Keep '<CONTEXT-UPDATE-REMINDER>' literal in stdout. PowerShell 7's
+# ConvertTo-Json escapes it as \u003c...\u003e, and Codex's hook injection
+# path may preserve that escaped text in the model context.
+$escapedNudge = ConvertTo-JsonStringLiteral -Value $nudge
+[Console]::Out.WriteLine('{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"' + $escapedNudge + '"}}')
 exit 0
