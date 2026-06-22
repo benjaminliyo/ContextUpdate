@@ -12,8 +12,12 @@ working instructions for contributing to this repo.
   description cause agents to skip the body. See
   `D:/Projects/superpowers/skills/writing-skills/SKILL.md:150-172` for the
   underlying rule.
-- **Word budgets are real.** `SKILL.md` body stays under ~500 words. The
-  session-start nudge stays under ~150 words.
+- **Be concise; don't pad.** Aim for the shortest skill body that still
+  passes the pressure scenarios. There is no hard word limit, but every
+  paragraph should earn its place — if you add 200 words, find 100 to
+  cut. Current `SKILL.md` body sits around 700 words; the session-start
+  nudge stays under ~150 words (that one IS a hard cap — it ships into
+  every session's context).
 
 ## Layout invariants
 

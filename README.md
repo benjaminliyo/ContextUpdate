@@ -101,11 +101,22 @@ the troubleshooting table.
 
 Add this repo as a Codex plugin source per the Codex docs for your
 install method. Codex picks up `.codex-plugin/plugin.json` and
-`hooks/hooks-codex.json` (which uses `${PLUGIN_ROOT}` and the
-`startup|resume|clear` matcher). The same `hooks/session-end-nudge`
-script runs and emits Codex's `hookSpecificOutput.additionalContext`
-shape. No slash command — invoke by message
-(*"run context-update on this conversation"*).
+discovers both skills via native lazy skill discovery — they appear
+in the developer prompt's `<skills_instructions>` block with their
+full descriptions, so the agent can invoke them when relevant.
+
+> **Known limitation (Codex Desktop on Windows, ≤ 0.142.0):**
+> `hooks/hooks-codex.json` is registered (visible in Codex's hook
+> panel with the right command, matcher, and timeout) but Codex
+> Desktop does not actually execute SessionStart hooks on Windows
+> as of 0.142.0-alpha.6. Verified 2026-06-22 by adding a
+> side-effect marker write — the marker never appears, and the
+> session transcript shows no hook output. Tracks with Codex's
+> documented "hooks not yet Windows-compatible" note. The skill
+> itself works fine via native discovery; only the auto wrap-up
+> nudge is missing on this surface. Invoke by message (*"run
+> context-update on this conversation"*) until Codex ships Windows
+> hook support.
 
 **Cursor**
 
@@ -116,13 +127,39 @@ route. The manifest at `.cursor-plugin/plugin.json` points
 (schema `version: 1`, lowercase `sessionStart`). Cursor also reads
 `AGENTS.md` at the repo root. Invoke by message.
 
-**Copilot CLI**
+> **Known limitation (Cursor ≤ 3.1.15, May 2026):** Cursor's
+> `sessionStart` hook fires and produces valid output, but Cursor
+> drops the returned `additional_context` before it reaches the
+> agent — a timing bug between hook execution and composer-handle
+> creation
+> ([forum thread](https://forum.cursor.com/t/sessionstart-hook-additional-context-is-never-injected-into-agents-initial-system-context/158452)).
+> The skill itself still works; you just have to invoke it
+> manually (by message or, if your build surfaces plugin slash
+> commands, `/context-update`). The auto wrap-up nudge will start
+> working again once Cursor ships the fix — no plugin change
+> required.
+
+**Copilot CLI** (requires Copilot CLI **≥ v1.0.11**)
 
 Copilot CLI reads `AGENTS.md` at the project root and loads skills
-from `~/.agents/skills/`. Copy `skills/context-update/` there. If
-you also wire the hook, `hooks/hooks.json` works as-is — the nudge
-script detects Copilot via `COPILOT_CLI=1` and emits the top-level
-`additionalContext` SDK shape. Invoke by message.
+from `~/.agents/skills/`. Copy `skills/context-update/` there.
+Invoke by message.
+
+To also wire the wrap-up nudge, copy `hooks/hooks.json` to one of
+Copilot CLI's hook locations — Copilot does **not** load hooks
+from a plugin folder:
+
+- Per-repo: `.github/hooks/context-update.json`
+- User-global: `~/.copilot/hooks/context-update.json`
+  (`%USERPROFILE%\.copilot\hooks\` on Windows)
+
+Set `COPILOT_CLI=1` in the hook's `env` so the
+`hooks/session-end-nudge` script emits the flat-`additionalContext`
+shape Copilot expects (this differs from VS Code / Claude Code's
+nested `hookSpecificOutput` shape). The fix that makes
+`additionalContext` actually reach the agent shipped in
+[Copilot CLI v1.0.11](https://github.com/github/copilot-cli/blob/main/changelog.md)
+on 2026-03-23; earlier versions silently drop it.
 
 **Gemini CLI**
 
@@ -348,7 +385,7 @@ for how the five discovery sources merge.
 
 ## Status
 
-v0.1.0 — MVP scaffold. See `RELEASE-NOTES.md`.
+v0.1.1. See `CHANGELOG.md` for full history.
 
 ## License
 

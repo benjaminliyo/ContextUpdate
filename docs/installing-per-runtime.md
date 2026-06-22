@@ -166,14 +166,39 @@ The Codex plugin layout mirrors Claude Code's but with a different
 manifest path and env var.
 
 - Manifest: `.codex-plugin/plugin.json`
+- Skills: discovered via Codex's native lazy enumeration. Both
+  `context-update` and `context-update-config` show up in the
+  developer prompt's `<skills_instructions>` block with their full
+  descriptions; the agent invokes them when relevant.
 - Hook config: `hooks/hooks-codex.json` (uses `${PLUGIN_ROOT}`,
   matcher `startup|resume|clear`)
-- Hook script: same `hooks/session-end-nudge` — branches on env vars and
-  emits the `hookSpecificOutput.additionalContext` JSON shape Codex
-  expects.
+- Hook script: same `hooks/session-end-nudge` — branches on env vars
+  (`CLAUDE_PLUGIN_ROOT` OR `PLUGIN_ROOT` → nested
+  `hookSpecificOutput.additionalContext`).
 
 Install by adding this repo as a Codex plugin source per the Codex docs
 for your install method.
+
+### Known limitation (Codex Desktop on Windows, ≤ 0.142.0)
+
+`hooks-codex.json` is registered (the Codex hook panel shows
+`Command`, `Matcher: startup|resume|clear`, `Timeout: 600s`) but
+Codex Desktop on Windows does **not** execute SessionStart hooks
+as of 0.142.0-alpha.6. Verified 2026-06-22 by adding a marker
+file write at the very top of `session-end-nudge` and starting a
+fresh Codex session — the marker file never appeared, and the
+session JSONL contained zero `hookSpecific`, `additionalContext`,
+or `CONTEXT-UPDATE-REMINDER` entries. The hook executor simply
+isn't wired up on this surface; this matches Codex's documented
+"hooks are not yet Windows-compatible" note.
+
+The skill still works on Codex Desktop / Windows via native
+discovery — invoke by message ("run context-update on this
+conversation"). Codex CLI on Linux/macOS is expected to execute
+the hook normally; the JSON-shape branching in
+`session-end-nudge` (now keyed off `PLUGIN_ROOT` in addition to
+`CLAUDE_PLUGIN_ROOT`) is ready for when Codex Desktop fixes the
+Windows path.
 
 ## Cursor
 
@@ -192,13 +217,38 @@ docs for your install method, or drop the `skills/context-update/`
 folder into Cursor's skills location (`~/.agents/skills/` is the
 cross-runtime alias) if you prefer the older manual route.
 
+### Known limitation (Cursor ≤ 3.1.15)
+
+As of Cursor 3.1.15 (May 2026), the `sessionStart` hook fires and
+produces valid stdout, but Cursor drops the returned
+`additional_context` before it reaches the agent's initial context.
+This is a known Cursor bug
+([forum #158452](https://forum.cursor.com/t/sessionstart-hook-additional-context-is-never-injected-into-agents-initial-system-context/158452)) —
+the manifest and hook script in this repo are spec-correct.
+Workaround: invoke the skill manually until Cursor ships the fix.
+No plugin change will be required when they do.
+
 ## Copilot CLI
+
+Requires Copilot CLI **≥ v1.0.11** (the
+[2026-03-23 release](https://github.com/github/copilot-cli/blob/main/changelog.md)
+that fixed
+[#2142](https://github.com/github/copilot-cli/issues/2142) —
+`onSessionStart` `additionalContext` was fire-and-forget on
+v1.0.8–v1.0.10 and never reached the agent).
 
 - Reads `AGENTS.md` at the project root.
 - Skills load from `~/.agents/skills/`.
-- If you also wire the hook, the existing `hooks/hooks.json` payload
-  shape works — the `session-end-nudge` script detects Copilot CLI via
-  `COPILOT_CLI=1` and emits top-level `additionalContext` (SDK standard).
+- **Hook installation is manual** — Copilot CLI does not load
+  hooks from a plugin folder. Copy `hooks/hooks.json` to either:
+  - Per-repo: `.github/hooks/context-update.json`
+  - User-global: `~/.copilot/hooks/context-update.json`
+    (`%USERPROFILE%\.copilot\hooks\` on Windows, or
+    `$COPILOT_HOME/hooks/` if that variable is set).
+- Set `COPILOT_CLI=1` in the hook's `env` block so
+  `session-end-nudge` emits the flat top-level `additionalContext`
+  shape Copilot CLI expects (Copilot rejects the
+  `hookSpecificOutput` wrapper that VS Code / Claude Code use).
 
 ## Gemini CLI
 

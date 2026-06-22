@@ -14,8 +14,10 @@ load it via the standard skill-loading flow (typically from
   requires explicit per-file user approval.
 - The frontmatter `description` on SKILL.md states *when* to use the
   skill, never *what* the workflow is.
-- Word budgets: SKILL.md body under ~500 words; the session-start nudge
-  under ~150.
+- Be concise; don't pad. SKILL.md body should be as short as the
+  pressure scenarios allow (currently ~700 words, no hard cap). The
+  session-start nudge IS hard-capped at ~150 words — it ships into
+  every session's context.
 
 See `CLAUDE.md` for the full working instructions — keep that file and
 this one (and `AGENTS.md`) in sync in the same commit.

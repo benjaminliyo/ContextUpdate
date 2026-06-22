@@ -66,6 +66,39 @@ To pin a specific version:
 }
 ```
 
+## Manual fallback (plugin-free)
+
+OpenCode's plugin API surfaces this skill uses
+(`config.skills.paths`, `experimental.chat.messages.transform`) are
+not in the public `opencode.ai/docs/plugins` reference, even though
+they work today. If a future OpenCode release changes that surface
+and the plugin silently stops doing its job, you can sidestep the
+plugin entirely:
+
+```bash
+# Linux / macOS
+cp -r skills/context-update ~/.config/opencode/skills/
+
+# Windows (PowerShell)
+Copy-Item -Recurse skills\context-update $env:USERPROFILE\.config\opencode\skills\
+```
+
+OpenCode auto-discovers skills from `~/.config/opencode/skills/`,
+`.opencode/skills/`, `.claude/skills/`, and `.agents/skills/`
+(project-local or global). After the copy, restart OpenCode and
+invoke the skill by message ("run context-update on this
+conversation") or via the native `skill` tool.
+
+What you lose with the manual route: the auto-injected
+`<CONTEXT-UPDATE-REMINDER>` nudge at session start. The skill
+itself still works — you just have to remember to invoke it. Same
+trade-off Cursor users currently have while Cursor's `sessionStart`
+hook bug is unfixed.
+
+Remove the plugin entry from `opencode.json` if you go this route,
+otherwise the (potentially broken) plugin and the manual copy will
+both run.
+
 ## Troubleshooting
 
 ### Plugin not loading

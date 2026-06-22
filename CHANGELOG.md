@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- `hooks/session-end-nudge` now emits the nested
+  `hookSpecificOutput.additionalContext` shape for Codex (detected
+  via `PLUGIN_ROOT` env var). Previously Codex fell into the generic
+  branch and received the flat `additionalContext` shape — which
+  Codex's docs say is not the supported schema. Forward-compatible
+  fix; harmless on every runtime that already worked.
+
+### Documented
+- Codex Desktop on Windows (≤ 0.142.0-alpha.6) **registers** the
+  SessionStart hook but does not execute it. Verified 2026-06-22
+  with a marker-file side-effect: marker never created, session
+  JSONL has zero hook traces despite the hook showing in Codex's
+  hook panel. Skill still works via native skill discovery; only
+  the auto wrap-up nudge is missing on this surface. README and
+  install doc now name this limitation alongside the Cursor
+  sessionStart bug.
+
 ## [0.1.1] — 2026-06-21
 
 ### Added
