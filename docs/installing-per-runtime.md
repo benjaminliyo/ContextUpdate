@@ -44,10 +44,27 @@ Claude.ai's Skills surface uses zip uploads — no plugin manifests and no
 SessionStart hooks. (Slash-command support varies; try `/context-update`
 first and fall back to a message invocation if it isn't registered.)
 
+### Pick a variant
+
+Two skill packages target Claude.ai:
+
+| If you… | Skill | Builder | Output zip |
+|---|---|---|---|
+| Only use Claude.ai (no Claude Code / Codex / Cursor install) | **`context-update-project`** — slim, single-layer, copy-paste deliverable, no filesystem assumptions | `scripts/build-claudeai-project-zip.{sh,ps1}` | `dist/context-update-project-claudeai-<version>.zip` |
+| Also use Claude Code / Codex / Cursor and want the same skill body everywhere | **`context-update`** — full coding-agent skill | `scripts/build-claudeai-zip.{sh,ps1}` | `dist/context-update-claudeai-<version>.zip` |
+
+Both scripts come in bash and PowerShell flavors. Both bash variants
+require `python3` on PATH; both PowerShell variants are self-contained.
+The sections below cover the full-skill builder; substitute the file
+name to build the slim variant — the flags and troubleshooting are
+identical.
+
 ### Build and upload
 
 Two scripts ship — pick the one for your shell. Both produce the same
-`dist/context-update-claudeai-<version>.zip`.
+`dist/context-update-claudeai-<version>.zip` (or the
+`context-update-project-claudeai-<version>.zip` variant if you
+substituted the slim script name).
 
 **Bash** (Git Bash on Windows, macOS Terminal, Linux). Requires
 `python3` on PATH. No external `zip` binary needed — the script uses
@@ -168,15 +185,18 @@ Claude Code project that *does* have one.)
   developer prompt's `<skills_instructions>` block with their full
   descriptions; the agent invokes them when relevant.
 - Hook config: `hooks/hooks-codex.json` (matcher
-  `startup|resume|clear`, calls PowerShell directly)
-- Hook script: `hooks/session-end-nudge.ps1` — native PowerShell;
-  reads `hooks/nudge.txt` and emits the nested
+  `startup|resume|clear`).
+- Hook command: `powershell … || bash …`. On Windows
+  PowerShell runs `hooks/session-end-nudge.ps1` and the bash fallback
+  never fires; on Linux/macOS the PowerShell call exits 127 ("command
+  not found") and the shell falls back to bash
+  `hooks/session-end-nudge`. Either path produces the nested
   `hookSpecificOutput.additionalContext` shape Codex expects.
 
 Install by adding this repo as a Codex plugin source per the Codex docs
 for your install method.
 
-### Why PowerShell instead of bash for Codex
+### Why PowerShell on Windows instead of bash
 
 Other Windows runtimes (Claude Code, Cursor, Copilot CLI) drive the
 hook through `hooks/run-hook.cmd` → Git Bash → `session-end-nudge`.
@@ -185,20 +205,13 @@ sync on Windows re-encodes the bash script's LF endings to CRLF,
 which breaks bash's parsing of the elif chain that selects the
 output JSON shape. We diagnosed three layers — `/usr/bin` not on
 PATH, Codex JSON shape mismatch, and CRLF corruption — before
-landing on PowerShell as the clean fix. PowerShell is native
+landing on PowerShell as the Windows fix. PowerShell is native
 Windows, has no Git Bash dependency, no `/usr/bin` PATH issue, no
 line-ending fragility, and emits proper UTF-8 JSON via
 `[System.IO.File]::ReadAllText` and `ConvertTo-Json -Compress`.
-
-### Known limitation — Codex on Linux / macOS
-
-The hook command hard-codes `powershell`, which isn't standard on
-Linux or macOS. Codex on those platforms registers the hook but
-the launcher will fail to find `powershell`. The skill still
-works via native discovery; auto wrap-up nudge is unsupported.
-Invoke by message ("run context-update on this conversation").
-A future release may add a polyglot launcher that dispatches to
-PowerShell on Windows and bash on Linux/macOS.
+Linux/macOS were never hit by the marketplace-sync CRLF issue, so
+the bash script works fine there; the `|| bash …` fallback in
+`hooks-codex.json` is the dispatch.
 
 ## Cursor
 

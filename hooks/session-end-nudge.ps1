@@ -8,8 +8,10 @@
 # output shape. This PowerShell version is native to Windows, has no
 # Git Bash dependency, no /usr/bin PATH issue, and no line-ending fragility.
 #
-# Linux/macOS Codex installs still go through hooks/session-end-nudge (bash)
-# via run-hook.cmd's polyglot Unix branch.
+# Cross-platform dispatch lives in hooks/hooks-codex.json, which chains
+# `powershell ... || bash ...`. On Windows powershell.exe succeeds and the
+# fallback never fires; on Linux/macOS powershell exits 127 (command not
+# found) and the shell falls back to running hooks/session-end-nudge.
 
 $ErrorActionPreference = 'Stop'
 

@@ -1,13 +1,15 @@
 # AGENTS.md
 
-Cross-runtime mirror of `CLAUDE.md` for Codex, Copilot CLI, Gemini CLI,
-and other agent frontends that look for `AGENTS.md` instead of (or in
-addition to) `CLAUDE.md`.
+Discovery shim for Codex, Copilot CLI, Gemini CLI, and other agent
+frontends that look for `AGENTS.md` instead of (or in addition to)
+`CLAUDE.md`.
 
-The contents are intentionally identical to `CLAUDE.md`. When updating
-working instructions for this repo, update both files in the same commit.
+**Reference `CLAUDE.md` for the canonical working instructions for this
+repo.** Both files describe the same project, so keeping a second full
+copy here would just drift. If a future runtime needs working
+instructions that genuinely differ from the Claude Code set, override
+or extend them in this file.
 
----
-
-(See `CLAUDE.md` for the canonical text. This file exists as a discovery
-convenience; the skill's discovery rules treat both equivalently.)
+The skill's own discovery rules treat `AGENTS.md` and `CLAUDE.md`
+equivalently, so an empty shim is enough to satisfy runtimes that
+require the filename.

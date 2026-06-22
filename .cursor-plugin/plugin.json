@@ -20,7 +20,6 @@
   ],
   "skills": [
     "./skills/context-update",
-    "./skills/context-update-nudge",
     "./skills/context-update-config"
   ],
   "hooks": "./hooks/hooks-cursor.json"

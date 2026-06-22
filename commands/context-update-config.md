@@ -11,14 +11,26 @@ the config.
 
 ## Invocation modes
 
-**Slash command** (runtimes with `commands/` auto-discovery — Claude
-Code, Codex, others):
+**Slash command** (Claude Code only — Claude Code is the only runtime
+that auto-discovers `commands/*.md`):
 
     /context-update-config list
     /context-update-config watch add CHANGELOG.md
     /context-update-config watch drop docs/legacy/old-plan.md
     /context-update-config ignore add docs/legacy/**
     /context-update-config ignore drop docs/legacy/**
+
+**Skill invocation** (Codex, Cursor, Kimi, OpenCode, Pi, and also
+Claude Code): same functionality, different entry point. Every supported
+runtime ships the sibling skill `context-update-config` — invoke it by
+name with the same subcommand string:
+
+    context-update-config list
+    context-update-config watch add CHANGELOG.md
+    ...
+
+See `skills/context-update-config/SKILL.md` for the runtime-agnostic
+version.
 
 **Natural language** (any runtime, any agent — when the user says
 something equivalent in conversation):
@@ -29,7 +41,8 @@ something equivalent in conversation):
     "unignore docs/legacy/**"
     "show context-update's watchlist"
 
-Both modes route to the same logic below.
+All three modes route to the same logic below — no runtime is missing
+this functionality, only the entry point differs.
 
 ## Subcommands
 
