@@ -162,40 +162,43 @@ Claude Code project that *does* have one.)
 
 ## Codex
 
-The Codex plugin layout mirrors Claude Code's but with a different
-manifest path and env var.
-
 - Manifest: `.codex-plugin/plugin.json`
 - Skills: discovered via Codex's native lazy enumeration. Both
   `context-update` and `context-update-config` show up in the
   developer prompt's `<skills_instructions>` block with their full
   descriptions; the agent invokes them when relevant.
-- Hook config: `hooks/hooks-codex.json` (uses `${PLUGIN_ROOT}`,
-  matcher `startup|resume|clear`)
-- Hook script: same `hooks/session-end-nudge` — branches on env vars
-  (`CLAUDE_PLUGIN_ROOT` OR `PLUGIN_ROOT` → nested
-  `hookSpecificOutput.additionalContext`).
+- Hook config: `hooks/hooks-codex.json` (matcher
+  `startup|resume|clear`, calls PowerShell directly)
+- Hook script: `hooks/session-end-nudge.ps1` — native PowerShell;
+  reads `hooks/nudge.txt` and emits the nested
+  `hookSpecificOutput.additionalContext` shape Codex expects.
 
 Install by adding this repo as a Codex plugin source per the Codex docs
 for your install method.
 
-### Windows PATH note
+### Why PowerShell instead of bash for Codex
 
-On Windows, Codex invokes `run-hook.cmd`, which calls `bash.exe`
-directly without sourcing Git Bash's login profile. That means
-`/usr/bin` (where `dirname`, `cat`, `date`, etc. live) is not
-auto-prepended to PATH, and the script would die on the first
-external command. `hooks/session-end-nudge` prepends `/usr/bin`
-to `PATH` near the top of the file to make itself self-sufficient
-in that environment. If you add a new external utility to a hook
-script, either rely on bash builtins or keep that PATH prepend
-in mind.
+Other Windows runtimes (Claude Code, Cursor, Copilot CLI) drive the
+hook through `hooks/run-hook.cmd` → Git Bash → `session-end-nudge`.
+That path doesn't work on Codex Desktop because Codex's marketplace
+sync on Windows re-encodes the bash script's LF endings to CRLF,
+which breaks bash's parsing of the elif chain that selects the
+output JSON shape. We diagnosed three layers — `/usr/bin` not on
+PATH, Codex JSON shape mismatch, and CRLF corruption — before
+landing on PowerShell as the clean fix. PowerShell is native
+Windows, has no Git Bash dependency, no `/usr/bin` PATH issue, no
+line-ending fragility, and emits proper UTF-8 JSON via
+`[System.IO.File]::ReadAllText` and `ConvertTo-Json -Compress`.
 
-Codex Desktop on Windows behaviour for SessionStart is still in
-active verification (as of 2026-06-22). Codex CLI fires the hook
-correctly. If the auto wrap-up nudge does not appear on Desktop
-after a fresh thread, invoke the skill by message ("run
-context-update on this conversation") and report it.
+### Known limitation — Codex on Linux / macOS
+
+The hook command hard-codes `powershell`, which isn't standard on
+Linux or macOS. Codex on those platforms registers the hook but
+the launcher will fail to find `powershell`. The skill still
+works via native discovery; auto wrap-up nudge is unsupported.
+Invoke by message ("run context-update on this conversation").
+A future release may add a polyglot launcher that dispatches to
+PowerShell on Windows and bash on Linux/macOS.
 
 ## Cursor
 

@@ -8,23 +8,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Fixed
-- `hooks/session-end-nudge` now emits the nested
-  `hookSpecificOutput.additionalContext` shape for Codex (detected
-  via `PLUGIN_ROOT` env var). Previously Codex fell into the generic
-  branch and received the flat `additionalContext` shape — which
-  Codex's docs say is not the supported schema. Forward-compatible
-  fix; harmless on every runtime that already worked.
-- `hooks/session-end-nudge` now prepends `/usr/bin` to `PATH` if
-  missing. On Windows, `run-hook.cmd` calls `bash.exe` directly
-  without sourcing the Git Bash login profile, so POSIX utilities
-  (`dirname`, `cat`, `date`, …) are not on PATH and the script
-  died on line 12 with `dirname: command not found`. Diagnosed via
-  Codex CLI's stderr output ("SessionStart Failed") on 2026-06-22 —
-  Codex dispatches the hook correctly; the script itself was the
-  failure point. Tested offline with `PATH=` (empty), with
-  `PATH=/c/Windows/System32:/c/Windows` (cmd.exe-style minimum),
-  and with full Git Bash PATH — all three now produce the expected
-  nested-shape JSON output.
+- Codex auto wrap-up nudge now works on Codex Desktop / Windows.
+  Three layered bugs were diagnosed on 2026-06-22:
+  1. Output JSON shape — Codex requires the nested
+     `hookSpecificOutput.additionalContext` form. The bash script
+     was emitting the flat shape because Codex sets `PLUGIN_ROOT`
+     (not `CLAUDE_PLUGIN_ROOT`), and the elif only matched the
+     latter.
+  2. Git Bash PATH — `run-hook.cmd` invokes `bash.exe` directly
+     without sourcing the login profile, so `/usr/bin` (dirname,
+     cat, date, …) wasn't on PATH and the script died on line 12.
+  3. CRLF line endings — Codex's marketplace sync on Windows
+     converted the bash script's LF endings to CRLF in its cache,
+     which broke bash's parsing of the elif chain (verified by
+     byte-comparing repo source vs cache).
+  Rather than keep stacking fixes on the bash path, the Codex hook
+  now uses native PowerShell (`hooks/session-end-nudge.ps1`).
+  PowerShell sidesteps every one of those failure modes. Verified
+  by inspecting a fresh Codex Desktop session's transcript — the
+  `<CONTEXT-UPDATE-REMINDER>` block arrives in the agent's context
+  on session start.
+- `.gitattributes` pins line endings: shell scripts and text
+  formats to LF, batch/cmd/ps1 files to CRLF. Defensive against
+  future autocrlf surprises across runtimes.
+
+### Added
+- `hooks/session-end-nudge.ps1` — PowerShell SessionStart hook for
+  Codex on Windows. Uses `[System.IO.File]::ReadAllText` to avoid
+  PowerShell 5.1's wrapped-string serialization quirk, forces
+  UTF-8 stdout without BOM, emits compact single-line nested-shape
+  JSON.
+
+### Known limitation
+- Codex on Linux/macOS — the hook command hard-codes `powershell`,
+  which isn't standard on those platforms. Auto-nudge is
+  unsupported there. The skill still works via native discovery
+  (invoke by message). Deferred: a polyglot launcher that
+  dispatches PowerShell on Windows and bash on Unix.
 
 ## [0.1.1] — 2026-06-21
 

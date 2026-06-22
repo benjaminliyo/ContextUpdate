@@ -103,12 +103,17 @@ Add this repo as a Codex plugin source per the Codex docs for your
 install method. Codex picks up `.codex-plugin/plugin.json` and
 discovers both skills via native lazy skill discovery — they appear
 in the developer prompt's `<skills_instructions>` block with their
-full descriptions. The SessionStart nudge runs via
-`hooks/hooks-codex.json` (matcher `startup|resume|clear`,
-`${PLUGIN_ROOT}` expansion); `hooks/session-end-nudge` emits the
-nested `hookSpecificOutput.additionalContext` shape Codex expects.
-Codex Desktop on Windows behaviour is still in active verification;
-Codex CLI on all platforms fires the hook normally.
+full descriptions. The SessionStart auto wrap-up nudge runs via
+`hooks/session-end-nudge.ps1` (PowerShell, called directly from
+`hooks/hooks-codex.json`). PowerShell sidesteps Git Bash's
+PATH/line-ending fragility on Windows — verified working on Codex
+Desktop 0.142.0-alpha.6 / Windows on 2026-06-22.
+
+> **Codex on Linux/macOS:** `powershell` isn't standard on those
+> platforms, so the auto-nudge is unsupported there. The skill
+> still works via native discovery — invoke by message ("run
+> context-update on this conversation"). A future release may add
+> a cross-platform launcher.
 
 **Cursor**
 
