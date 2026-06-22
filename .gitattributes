@@ -1,0 +1,26 @@
+# Default to text auto-detection so platform-native line endings are used
+# in the working tree.
+* text=auto
+
+# Bash scripts must be LF in every checkout. Codex's marketplace sync on
+# Windows was converting LF -> CRLF, which broke bash's parsing of the
+# elif-chain that selects the output JSON shape (verified 2026-06-22 by
+# byte-comparing repo source vs Codex cache: cache had 63 CRLF pairs and
+# emitted the wrong shape; converting cache to LF fixed it).
+hooks/session-end-nudge text eol=lf
+hooks/nudge.txt text eol=lf
+*.sh text eol=lf
+
+# Windows batch / cmd files must be CRLF for cmd.exe parsing.
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# JSON / TOML / Markdown: LF (cross-platform plain text).
+*.json text eol=lf
+*.toml text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.ts text eol=lf
+*.js text eol=lf
