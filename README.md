@@ -7,8 +7,10 @@ Reusable-context files (`CLAUDE.md`, `AGENTS.md`, `~/.claude/CLAUDE.md`,
 `docs/plans/*.md`, `.cursor/rules/*.mdc`, …) silently go stale as projects
 evolve. A preference set on day 1 is overridden by a conversation on day 30,
 and the file still says day 1. Future sessions then load the stale statement
-as current. ContextUpdate is a Claude Code skill plugin that catches this
-on demand or at session wrap-up.
+as current. ContextUpdate is a cross-runtime agent skill — verified on
+Claude Code and Codex, packaged for Claude.ai, Cursor, Copilot CLI,
+Gemini CLI, Kimi Code, OpenCode, and Pi — that catches this on demand
+or at session wrap-up.
 
 ## What makes it different
 
