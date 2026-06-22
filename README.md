@@ -8,9 +8,9 @@ Reusable-context files (`CLAUDE.md`, `AGENTS.md`, `~/.claude/CLAUDE.md`,
 evolve. A preference set on day 1 is overridden by a conversation on day 30,
 and the file still says day 1. Future sessions then load the stale statement
 as current. ContextUpdate is a cross-runtime agent skill — verified on
-Claude Code and Codex, packaged for Claude.ai, Cursor, Copilot CLI,
-Gemini CLI, Kimi Code, OpenCode, and Pi — that catches this on demand
-or at session wrap-up.
+Claude Code and Codex Desktop (Windows), packaged for Claude.ai, Cursor,
+Copilot CLI, Gemini CLI, Kimi Code, OpenCode, and Pi — that catches this
+on demand or at session wrap-up.
 
 ## What makes it different
 
@@ -47,10 +47,13 @@ Two skill packages target Claude.ai. Pick one:
 | Also use Claude Code / Codex / Cursor and want the same skill body everywhere | **`context-update`** — full coding-agent skill | `build-claudeai-zip.{sh,ps1}` |
 
 Web and desktop Claude.ai are the same target — neither gives the model
-filesystem access. The slim variant is purpose-built for that
-constraint; the full skill works there too but carries config-schema,
-discovery-probe, and apply-loop content that has no effect on the web
-surface.
+filesystem access. **The slim `context-update-project` variant is the
+recommended Claude.ai path.** The full `context-update` zip is the
+same coding-agent skill body packaged for upload; it's a
+compatibility option for users who want one skill body across all
+their tools, not a recommended Claude.ai entry point — it carries
+filesystem/config/apply-loop behavior that Claude.ai cannot execute
+directly.
 
 #### Build the slim variant (recommended for Claude.ai-only users)
 
@@ -111,8 +114,19 @@ full descriptions. The SessionStart auto wrap-up nudge command in
 `hooks/session-end-nudge.ps1` (sidestepping Git Bash's
 PATH/line-ending fragility); on Linux/macOS the PowerShell call exits
 with "command not found" and the shell falls back to the bash
-`hooks/session-end-nudge` script. Verified working on Codex
-Desktop 0.142.0-alpha.6 / Windows on 2026-06-22.
+`hooks/session-end-nudge` script.
+
+> **Codex/Windows verified.** Codex Desktop 0.142.0-alpha.6 / Windows,
+> 2026-06-22 — the `<CONTEXT-UPDATE-REMINDER>` block reaches the
+> agent's initial context.
+>
+> **Codex/Linux + macOS: fallback implemented, not maintainer-verified.**
+> The logic is straightforward (`powershell` missing → shell exits 127
+> → `||` triggers `bash hooks/session-end-nudge`, which already emits
+> the correct nested shape when Codex's `PLUGIN_ROOT` is set). It
+> should work on any Codex install that runs hook commands through a
+> POSIX shell with `bash` available, but no maintainer device has
+> exercised it. Reports welcome.
 
 **Cursor**
 

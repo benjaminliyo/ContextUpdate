@@ -193,6 +193,13 @@ Claude Code project that *does* have one.)
   `hooks/session-end-nudge`. Either path produces the nested
   `hookSpecificOutput.additionalContext` shape Codex expects.
 
+### Verification status
+
+| Platform | Status |
+|---|---|
+| Codex Desktop / Windows | Verified 2026-06-22 on 0.142.0-alpha.6 — `<CONTEXT-UPDATE-REMINDER>` reaches the agent. |
+| Codex / Linux + macOS | Fallback implemented (`\|\| bash hooks/session-end-nudge`), expected to work on any Codex install that runs hook commands through a POSIX shell with `bash` available. Not maintainer-verified — no Linux/macOS Codex device exercised. Reports welcome. |
+
 Install by adding this repo as a Codex plugin source per the Codex docs
 for your install method.
 
