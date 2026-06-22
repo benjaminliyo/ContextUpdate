@@ -16,8 +16,8 @@ if ($skillText -notmatch "(?m)^name:\s*context-update-config\s*$") {
 
 $manifestPath = Join-Path $Root ".codex-plugin/plugin.json"
 $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-if ($manifest.version -ne "0.1.1") {
-    throw ".codex-plugin/plugin.json version must be 0.1.1 so Codex installs a visibly updated bundle"
+if ($manifest.version -ne "0.1.2") {
+    throw ".codex-plugin/plugin.json version must be 0.1.2 so Codex installs a visibly updated bundle"
 }
 
 Write-Host "PASS Codex skill surface includes context-update-config"

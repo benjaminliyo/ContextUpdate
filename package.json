@@ -1,6 +1,6 @@
 {
   "name": "context-update",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Claude Code skill plugin that detects and proposes edits when reusable-context files drift from decisions made in the current conversation.",
   "license": "MIT",
   "author": {

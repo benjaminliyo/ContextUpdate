@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.2] — 2026-06-22
+
 ### Fixed
 - Codex auto wrap-up nudge now works on Codex Desktop / Windows.
   Three layered bugs were diagnosed on 2026-06-22:

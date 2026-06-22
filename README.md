@@ -382,7 +382,7 @@ for how the five discovery sources merge.
 
 ## Status
 
-v0.1.1. See `CHANGELOG.md` for full history.
+v0.1.2. See `CHANGELOG.md` for full history.
 
 ## License
 
