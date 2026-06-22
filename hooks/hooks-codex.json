@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}/hooks/run-hook.cmd\" session-end-nudge",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${PLUGIN_ROOT}/hooks/session-end-nudge.ps1\"",
             "async": false
           }
         ]
