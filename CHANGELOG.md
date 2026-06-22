@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- Codex auto wrap-up nudge now reaches Codex on Linux/macOS, not just
+  Windows. `hooks/hooks-codex.json` chains `powershell ... || bash ...`:
+  on Windows PowerShell runs `hooks/session-end-nudge.ps1`; on
+  Linux/macOS the PowerShell call exits 127 ("command not found") and
+  the shell falls back to the existing bash `hooks/session-end-nudge`,
+  which already emits the nested `hookSpecificOutput.additionalContext`
+  shape Codex expects. Codex/Windows path verified; Codex/Linux+macOS
+  fallback implemented but not maintainer-verified (reports welcome).
+- `commands/context-update-config.md` invocation modes rewritten to
+  stop implying the slash command works on Codex/others. Slash
+  command is Claude Code only; every other agent gets identical
+  functionality via the sibling `context-update-config` skill or
+  natural language.
+- `AGENTS.md` rewritten as a discovery shim that references CLAUDE.md
+  as canonical. The previous "intentionally identical" claim was
+  never true.
+- `docs/installing-per-runtime.md` Claude.ai section now documents
+  both the slim `context-update-project` and the full `context-update`
+  builder scripts, with output zip names. Troubleshooting line for
+  "skill doesn't appear" now lists both top-level entries.
+
+### Changed
+- `context-update-nudge` skill removed from `.codex-plugin/plugin.json`
+  and `.cursor-plugin/plugin.json`. Both runtimes deliver the nudge
+  via SessionStart hook, so exposing the always-loaded skill was dead
+  manifest weight that contradicted the skill's own "do NOT load on
+  runtimes with hooks" frontmatter. Kimi remains the only manifest
+  that lists it (Kimi has no `additionalContext` injection surface).
+- `README.md` opener reframed as "cross-runtime agent skill — verified
+  on Claude Code and Codex Desktop (Windows), packaged for Claude.ai,
+  Cursor, Copilot CLI, Gemini CLI, Kimi Code, OpenCode, and Pi", and
+  the Claude.ai paragraph now states explicitly that the slim variant
+  is the recommended Claude.ai path while the full zip is a
+  cross-runtime compatibility option.
+
 ## [0.1.2] — 2026-06-22
 
 ### Fixed
