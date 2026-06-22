@@ -179,26 +179,23 @@ manifest path and env var.
 Install by adding this repo as a Codex plugin source per the Codex docs
 for your install method.
 
-### Known limitation (Codex Desktop on Windows, ≤ 0.142.0)
+### Windows PATH note
 
-`hooks-codex.json` is registered (the Codex hook panel shows
-`Command`, `Matcher: startup|resume|clear`, `Timeout: 600s`) but
-Codex Desktop on Windows does **not** execute SessionStart hooks
-as of 0.142.0-alpha.6. Verified 2026-06-22 by adding a marker
-file write at the very top of `session-end-nudge` and starting a
-fresh Codex session — the marker file never appeared, and the
-session JSONL contained zero `hookSpecific`, `additionalContext`,
-or `CONTEXT-UPDATE-REMINDER` entries. The hook executor simply
-isn't wired up on this surface; this matches Codex's documented
-"hooks are not yet Windows-compatible" note.
+On Windows, Codex invokes `run-hook.cmd`, which calls `bash.exe`
+directly without sourcing Git Bash's login profile. That means
+`/usr/bin` (where `dirname`, `cat`, `date`, etc. live) is not
+auto-prepended to PATH, and the script would die on the first
+external command. `hooks/session-end-nudge` prepends `/usr/bin`
+to `PATH` near the top of the file to make itself self-sufficient
+in that environment. If you add a new external utility to a hook
+script, either rely on bash builtins or keep that PATH prepend
+in mind.
 
-The skill still works on Codex Desktop / Windows via native
-discovery — invoke by message ("run context-update on this
-conversation"). Codex CLI on Linux/macOS is expected to execute
-the hook normally; the JSON-shape branching in
-`session-end-nudge` (now keyed off `PLUGIN_ROOT` in addition to
-`CLAUDE_PLUGIN_ROOT`) is ready for when Codex Desktop fixes the
-Windows path.
+Codex Desktop on Windows behaviour for SessionStart is still in
+active verification (as of 2026-06-22). Codex CLI fires the hook
+correctly. If the auto wrap-up nudge does not appear on Desktop
+after a fresh thread, invoke the skill by message ("run
+context-update on this conversation") and report it.
 
 ## Cursor
 

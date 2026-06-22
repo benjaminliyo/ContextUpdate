@@ -9,6 +9,16 @@
 
 set -euo pipefail
 
+# Ensure POSIX utilities are on PATH. On Windows, run-hook.cmd invokes
+# bash.exe directly without sourcing Git Bash's login profile, so /usr/bin
+# (dirname, cat, date, ...) is not auto-prepended. Verified 2026-06-22 by
+# Codex CLI: the hook fires, but dies on line 12 with "dirname: command
+# not found". This block makes the script self-sufficient.
+case ":$PATH:" in
+  *:/usr/bin:*) ;;
+  *) [ -d /usr/bin ] && export PATH="/usr/bin:$PATH" ;;
+esac
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NUDGE_FILE="${SCRIPT_DIR}/nudge.txt"
 

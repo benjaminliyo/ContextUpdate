@@ -14,16 +14,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   branch and received the flat `additionalContext` shape — which
   Codex's docs say is not the supported schema. Forward-compatible
   fix; harmless on every runtime that already worked.
-
-### Documented
-- Codex Desktop on Windows (≤ 0.142.0-alpha.6) **registers** the
-  SessionStart hook but does not execute it. Verified 2026-06-22
-  with a marker-file side-effect: marker never created, session
-  JSONL has zero hook traces despite the hook showing in Codex's
-  hook panel. Skill still works via native skill discovery; only
-  the auto wrap-up nudge is missing on this surface. README and
-  install doc now name this limitation alongside the Cursor
-  sessionStart bug.
+- `hooks/session-end-nudge` now prepends `/usr/bin` to `PATH` if
+  missing. On Windows, `run-hook.cmd` calls `bash.exe` directly
+  without sourcing the Git Bash login profile, so POSIX utilities
+  (`dirname`, `cat`, `date`, …) are not on PATH and the script
+  died on line 12 with `dirname: command not found`. Diagnosed via
+  Codex CLI's stderr output ("SessionStart Failed") on 2026-06-22 —
+  Codex dispatches the hook correctly; the script itself was the
+  failure point. Tested offline with `PATH=` (empty), with
+  `PATH=/c/Windows/System32:/c/Windows` (cmd.exe-style minimum),
+  and with full Git Bash PATH — all three now produce the expected
+  nested-shape JSON output.
 
 ## [0.1.1] — 2026-06-21
 

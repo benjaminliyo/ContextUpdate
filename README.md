@@ -103,20 +103,12 @@ Add this repo as a Codex plugin source per the Codex docs for your
 install method. Codex picks up `.codex-plugin/plugin.json` and
 discovers both skills via native lazy skill discovery — they appear
 in the developer prompt's `<skills_instructions>` block with their
-full descriptions, so the agent can invoke them when relevant.
-
-> **Known limitation (Codex Desktop on Windows, ≤ 0.142.0):**
-> `hooks/hooks-codex.json` is registered (visible in Codex's hook
-> panel with the right command, matcher, and timeout) but Codex
-> Desktop does not actually execute SessionStart hooks on Windows
-> as of 0.142.0-alpha.6. Verified 2026-06-22 by adding a
-> side-effect marker write — the marker never appears, and the
-> session transcript shows no hook output. Tracks with Codex's
-> documented "hooks not yet Windows-compatible" note. The skill
-> itself works fine via native discovery; only the auto wrap-up
-> nudge is missing on this surface. Invoke by message (*"run
-> context-update on this conversation"*) until Codex ships Windows
-> hook support.
+full descriptions. The SessionStart nudge runs via
+`hooks/hooks-codex.json` (matcher `startup|resume|clear`,
+`${PLUGIN_ROOT}` expansion); `hooks/session-end-nudge` emits the
+nested `hookSpecificOutput.additionalContext` shape Codex expects.
+Codex Desktop on Windows behaviour is still in active verification;
+Codex CLI on all platforms fires the hook normally.
 
 **Cursor**
 
