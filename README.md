@@ -109,24 +109,28 @@ install method. Codex picks up `.codex-plugin/plugin.json` and
 discovers both skills via native lazy skill discovery — they appear
 in the developer prompt's `<skills_instructions>` block with their
 full descriptions. The SessionStart auto wrap-up nudge command in
-`hooks/hooks-codex.json` chains
-`powershell … || bash …`: on Windows PowerShell runs
-`hooks/session-end-nudge.ps1` (sidestepping Git Bash's
-PATH/line-ending fragility); on Linux/macOS the PowerShell call exits
-with "command not found" and the shell falls back to the bash
-`hooks/session-end-nudge` script.
+`hooks/hooks-codex.json` invokes `hooks/codex-launcher.cmd`, a
+cmd/bash polyglot: on Windows cmd.exe runs the batch portion and
+dispatches to `hooks/session-end-nudge.ps1` (sidestepping Git Bash's
+PATH/line-ending fragility); on Linux/macOS bash treats the cmd
+portion as a heredoc no-op and execs the bash
+`hooks/session-end-nudge` script directly.
 
-> **Codex/Windows verified.** Codex Desktop 0.142.0-alpha.6 / Windows,
-> 2026-06-22 — the `<CONTEXT-UPDATE-REMINDER>` block reaches the
-> agent's initial context.
+> **Codex/Windows: launcher tested in isolation; Codex Desktop
+> re-verification pending.** The Windows branch of the launcher
+> dispatches to the same `session-end-nudge.ps1` command that was
+> Codex Desktop / Windows verified on 0.142.0-alpha.6 in v0.1.2.
+> The new `.cmd` wrapper around it parses correctly via cmd.exe in
+> standalone testing (exit 0, correct JSON), but the polyglot
+> launcher itself has not been exercised under Codex Desktop yet.
 >
 > **Codex/Linux + macOS: fallback implemented, not maintainer-verified.**
-> The logic is straightforward (`powershell` missing → shell exits 127
-> → `||` triggers `bash hooks/session-end-nudge`, which already emits
-> the correct nested shape when Codex's `PLUGIN_ROOT` is set). It
-> should work on any Codex install that runs hook commands through a
-> POSIX shell with `bash` available, but no maintainer device has
-> exercised it. Reports welcome.
+> The polyglot launcher's Unix branch execs `bash hooks/session-end-nudge`,
+> which already emits the correct nested shape when Codex's
+> `PLUGIN_ROOT` is set. Tested via Git Bash (POSIX-bash proxy on
+> Windows) — exit 0, correct JSON. Should work on any Codex install
+> that runs hook commands through a POSIX shell with `bash` available,
+> but no maintainer device has exercised it. Reports welcome.
 
 **Cursor**
 

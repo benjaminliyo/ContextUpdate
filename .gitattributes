@@ -16,6 +16,11 @@ hooks/nudge.txt text eol=lf
 *.bat text eol=crlf
 *.ps1 text eol=crlf
 
+# Exception: codex-launcher.cmd is a cmd/bash polyglot. It needs LF so the
+# bash heredoc terminator (CMDBLOCK) matches on Linux/macOS. cmd.exe on
+# Windows 10/11 accepts LF for this simple linear batch.
+hooks/codex-launcher.cmd text eol=lf
+
 # JSON / TOML / Markdown: LF (cross-platform plain text).
 *.json text eol=lf
 *.toml text eol=lf

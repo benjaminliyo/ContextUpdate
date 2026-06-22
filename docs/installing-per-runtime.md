@@ -186,19 +186,25 @@ Claude Code project that *does* have one.)
   descriptions; the agent invokes them when relevant.
 - Hook config: `hooks/hooks-codex.json` (matcher
   `startup|resume|clear`).
-- Hook command: `powershell … || bash …`. On Windows
-  PowerShell runs `hooks/session-end-nudge.ps1` and the bash fallback
-  never fires; on Linux/macOS the PowerShell call exits 127 ("command
-  not found") and the shell falls back to bash
-  `hooks/session-end-nudge`. Either path produces the nested
+- Hook command: invokes `hooks/codex-launcher.cmd`, a cmd/bash
+  polyglot. On Windows cmd.exe runs the batch portion and dispatches
+  to `hooks/session-end-nudge.ps1`; on Linux/macOS bash treats the
+  cmd portion as a heredoc no-op and execs
+  `hooks/session-end-nudge` directly. Either path produces the nested
   `hookSpecificOutput.additionalContext` shape Codex expects.
+- An earlier attempt inlined `powershell … || bash …` into the
+  `command` field directly. That regressed Codex/Windows because
+  Codex/Windows doesn't pass the `command` value through a shell
+  that interprets `||` — the trailing tokens went to PowerShell as
+  positional args and the hook exited 1. The launcher script avoids
+  any inline shell syntax.
 
 ### Verification status
 
 | Platform | Status |
 |---|---|
-| Codex Desktop / Windows | Verified 2026-06-22 on 0.142.0-alpha.6 — `<CONTEXT-UPDATE-REMINDER>` reaches the agent. |
-| Codex / Linux + macOS | Fallback implemented (`\|\| bash hooks/session-end-nudge`), expected to work on any Codex install that runs hook commands through a POSIX shell with `bash` available. Not maintainer-verified — no Linux/macOS Codex device exercised. Reports welcome. |
+| Codex Desktop / Windows | The Windows branch of the polyglot launcher dispatches to `session-end-nudge.ps1`, which was Codex Desktop / Windows verified on 0.142.0-alpha.6 in v0.1.2 (`<CONTEXT-UPDATE-REMINDER>` reached the agent). The new `.cmd` launcher itself parses correctly via cmd.exe in standalone testing (exit 0, correct JSON); end-to-end Codex Desktop re-verification after the launcher swap is pending. |
+| Codex / Linux + macOS | Fallback implemented via `hooks/codex-launcher.cmd`'s bash branch (heredoc-no-op past the cmd portion, then `exec bash hooks/session-end-nudge`). Expected to work on any Codex install that runs hook commands through a POSIX shell with `bash` available. Not maintainer-verified — no Linux/macOS Codex device exercised. Reports welcome. |
 
 Install by adding this repo as a Codex plugin source per the Codex docs
 for your install method.
@@ -217,8 +223,11 @@ Windows, has no Git Bash dependency, no `/usr/bin` PATH issue, no
 line-ending fragility, and emits proper UTF-8 JSON via
 `[System.IO.File]::ReadAllText` and `ConvertTo-Json -Compress`.
 Linux/macOS were never hit by the marketplace-sync CRLF issue, so
-the bash script works fine there; the `|| bash …` fallback in
-`hooks-codex.json` is the dispatch.
+the bash script works fine there; the bash branch of
+`hooks/codex-launcher.cmd` (a cmd/bash polyglot using the
+`: << 'CMDBLOCK' … CMDBLOCK` heredoc trick) is the dispatch. The
+launcher is pinned to LF in `.gitattributes` so the heredoc
+terminator parses correctly on Unix.
 
 ## Cursor
 

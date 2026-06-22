@@ -9,13 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 - Codex auto wrap-up nudge now reaches Codex on Linux/macOS, not just
-  Windows. `hooks/hooks-codex.json` chains `powershell ... || bash ...`:
-  on Windows PowerShell runs `hooks/session-end-nudge.ps1`; on
-  Linux/macOS the PowerShell call exits 127 ("command not found") and
-  the shell falls back to the existing bash `hooks/session-end-nudge`,
-  which already emits the nested `hookSpecificOutput.additionalContext`
-  shape Codex expects. Codex/Windows path verified; Codex/Linux+macOS
-  fallback implemented but not maintainer-verified (reports welcome).
+  Windows. `hooks/hooks-codex.json` invokes a new
+  `hooks/codex-launcher.cmd` polyglot: on Windows cmd.exe runs the
+  batch portion and dispatches to `hooks/session-end-nudge.ps1`; on
+  Linux/macOS bash treats the cmd portion as a heredoc no-op and
+  execs `hooks/session-end-nudge` directly, which already emits the
+  nested `hookSpecificOutput.additionalContext` shape Codex expects.
+  Both branches tested in isolation (Windows cmd.exe and POSIX bash
+  via Git Bash): each emits the correct JSON with exit 0. Codex
+  Desktop end-to-end re-verification on Windows is pending after the
+  launcher swap; Codex/Linux+macOS remains not maintainer-verified
+  on a real device (reports welcome).
+- The earlier `powershell ... || bash ...` inline-chain attempt (first
+  shipped post-v0.1.2) regressed Codex/Windows because whatever Codex
+  on Windows uses to invoke the `command` string does not interpret
+  `||` as a shell OR-chain — the trailing tokens were passed through
+  to PowerShell as positional args, breaking the SessionStart hook
+  with exit code 1. The polyglot launcher avoids any inline shell
+  syntax: the `command` field is now a single quoted path, exactly
+  like every other runtime's hook config.
+- `.gitattributes` adds an LF override for `hooks/codex-launcher.cmd`
+  (the default `*.cmd text eol=crlf` would have broken the bash
+  heredoc terminator on Unix checkouts).
 - `commands/context-update-config.md` invocation modes rewritten to
   stop implying the slash command works on Codex/others. Slash
   command is Claude Code only; every other agent gets identical
