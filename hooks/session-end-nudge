@@ -45,20 +45,17 @@ ESCAPED=$(escape_for_json "$NUDGE")
 
 # Emit the additional-context JSON in the shape the current runtime expects.
 #   Cursor                       -> additional_context (snake_case)
-#   Claude Code, Codex           -> both flat additionalContext AND nested
-#                                   hookSpecificOutput.additionalContext
-#                                   (different Codex builds have honored
-#                                   different shapes; emitting both maximizes
-#                                   compatibility, matches session-end-nudge.ps1)
+#   Claude Code, Codex           -> hookSpecificOutput.additionalContext (nested)
 #   Copilot CLI, generic SDK     -> additionalContext (flat)
 #
-# Codex sets PLUGIN_ROOT (without prefix). Claude Code sets CLAUDE_PLUGIN_ROOT.
-# Cursor sets CURSOR_PLUGIN_ROOT. Copilot CLI requires COPILOT_CLI=1 manually
-# in the hook env block.
+# Codex sets PLUGIN_ROOT (without prefix) and silently drops the flat shape
+# (verified 2026-06-22 — Codex returns "not present" when asked to find the
+# reminder block after a flat-shape hook output). Treat Codex like Claude
+# Code unless the user explicitly opted into Copilot CLI via COPILOT_CLI=1.
 if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
   printf '{\n  "additional_context": "%s"\n}\n' "$ESCAPED"
 elif { [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || [ -n "${PLUGIN_ROOT:-}" ]; } && [ -z "${COPILOT_CLI:-}" ]; then
-  printf '{\n  "additionalContext": "%s",\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$ESCAPED" "$ESCAPED"
+  printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$ESCAPED"
 else
   printf '{\n  "additionalContext": "%s"\n}\n' "$ESCAPED"
 fi

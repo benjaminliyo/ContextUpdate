@@ -8,13 +8,8 @@
 # output shape. This PowerShell version is native to Windows, has no
 # Git Bash dependency, no /usr/bin PATH issue, and no line-ending fragility.
 #
-# Cross-platform dispatch lives in hooks/hooks-codex.json, which registers
-# two SessionStart (and UserPromptSubmit) hook entries: one calling
-# `powershell -File hooks/session-end-nudge.ps1` (this script) and one
-# calling `bash hooks/session-end-nudge`. On each platform one entry
-# succeeds (interpreter present) and the other fails (interpreter not on
-# PATH). Codex surfaces the failing entry as a notification but the
-# succeeding entry still injects the nudge.
+# Linux/macOS Codex installs still go through hooks/session-end-nudge (bash)
+# via run-hook.cmd's polyglot Unix branch.
 
 $ErrorActionPreference = 'Stop'
 
@@ -34,37 +29,14 @@ if (-not (Test-Path -LiteralPath $nudgePath)) {
 # in PowerShell 5.1, which Codex would reject.
 $nudge = [System.IO.File]::ReadAllText($nudgePath)
 
-function ConvertTo-JsonStringLiteral {
-    param([Parameter(Mandatory = $true)][string]$Value)
-
-    $builder = [System.Text.StringBuilder]::new()
-    foreach ($char in $Value.ToCharArray()) {
-        switch ($char) {
-            '\' { [void]$builder.Append('\\') }
-            '"' { [void]$builder.Append('\"') }
-            "`b" { [void]$builder.Append('\b') }
-            "`f" { [void]$builder.Append('\f') }
-            "`n" { [void]$builder.Append('\n') }
-            "`r" { [void]$builder.Append('\r') }
-            "`t" { [void]$builder.Append('\t') }
-            default {
-                if ([int][char]$char -lt 0x20) {
-                    [void]$builder.Append(('\u{0:x4}' -f [int][char]$char))
-                } else {
-                    [void]$builder.Append($char)
-                }
-            }
-        }
+$payload = [ordered]@{
+    hookSpecificOutput = [ordered]@{
+        hookEventName     = 'SessionStart'
+        additionalContext = $nudge
     }
-
-    $builder.ToString()
 }
 
-# Keep '<CONTEXT-UPDATE-REMINDER>' literal in stdout. PowerShell 7's
-# ConvertTo-Json escapes it as \u003c...\u003e, and Codex's hook injection
-# path may preserve that escaped text in the model context. Emit both the
-# nested and flat context keys because Codex hook builds have differed on
-# which shape they honor.
-$escapedNudge = ConvertTo-JsonStringLiteral -Value $nudge
-[Console]::Out.WriteLine('{"additionalContext":"' + $escapedNudge + '","hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"' + $escapedNudge + '"}}')
+# -Compress avoids PowerShell 5.1's wide-indented JSON; Codex parses either,
+# but compressed output is one line and easier to log/diff.
+$payload | ConvertTo-Json -Depth 5 -Compress
 exit 0

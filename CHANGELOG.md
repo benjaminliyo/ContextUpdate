@@ -8,16 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Fixed
-- `hooks/hooks-codex.json` reverted to the v0.1.2 form: single
-  `SessionStart` entry, direct `powershell -NoProfile -ExecutionPolicy
-  Bypass -File hooks/session-end-nudge.ps1`. No `UserPromptSubmit`
-  hook, no bash entry, no launcher. The dual-entry approach (one
-  PowerShell + one bash) was added to also cover Codex/macOS+Linux
-  but did not inject the nudge under Codex Desktop on the
-  maintainer's Windows build during testing. Reverting to the
-  exact shape that was verified working in v0.1.2 (Codex Desktop
-  0.142.0-alpha.6, 2026-06-22) restores a known-good Windows path
-  while the macOS/Linux story remains deferred.
+- **Complete revert** of the entire Codex/Windows hook stack to its
+  exact v0.1.2 state. `hooks/hooks-codex.json`,
+  `hooks/session-end-nudge.ps1`, `hooks/session-end-nudge`, and
+  `tests/verify-codex-surface.ps1` are now byte-identical to commit
+  `e5fa156` (Release v0.1.2 — Codex/Windows hook via PowerShell).
+  Every intermediate Codex/Windows experiment between v0.1.2 and now
+  (inline `powershell ... || bash ...` chain; cmd/bash polyglot
+  launcher `hooks/codex-launcher.cmd`; dual hook entries; dual-key
+  JSON with literal markers; custom JSON escaper preserving `<>`)
+  failed to inject the `<CONTEXT-UPDATE-REMINDER>` block under the
+  maintainer's current Codex Desktop, including the rebuild of the
+  exact v0.1.2 hook-config shape. This revert restores the bytes
+  that were verified working on Codex Desktop 0.142.0-alpha.6
+  (2026-06-22) so the user can A/B test whether their current Codex
+  Desktop build still honors that exact shape, isolating whether the
+  failure is in our scripts or in Codex's hook ingestion.
+- Codex/macOS+Linux auto-nudge is unsupported again (deferred). The
+  skill still works via native discovery — invoke by message.
+- README.md and docs/installing-per-runtime.md still describe the
+  dual-entry approach. They'll get a follow-up sweep once the
+  Codex/Windows behavior is understood.
 - The interim `hooks/codex-launcher.cmd` polyglot has been removed.
   Diagnosing with the user revealed that even though the launcher
   emitted correct stdout in every isolated test (cmd.exe, PowerShell,
