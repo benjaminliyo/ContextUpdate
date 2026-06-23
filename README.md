@@ -109,32 +109,30 @@ install method. Codex picks up `.codex-plugin/plugin.json` and
 discovers both skills via native lazy skill discovery — they appear
 in the developer prompt's `<skills_instructions>` block with their
 full descriptions. The auto wrap-up nudge in `hooks/hooks-codex.json`
-registers **two** hook entries per event (`SessionStart` and
-`UserPromptSubmit`): one calling `powershell -File
-hooks/session-end-nudge.ps1` directly, one calling `bash
-hooks/session-end-nudge` directly. On each platform one interpreter
-is present and injects the nudge; the other fails with "interpreter
-not found" and Codex surfaces it as a per-entry notification. Direct
-invocation matches the form that was verified working on Codex/Windows
-in v0.1.2 — there is no cmd.exe wrapper script between Codex and
-PowerShell.
+registers **two `SessionStart` entries**: one calling `powershell
+-NoProfile -ExecutionPolicy Bypass -File hooks/session-end-nudge.ps1`
+directly, one calling `bash hooks/session-end-nudge` directly. On
+each platform one interpreter is the native fit and injects the
+nudge; the other fails with exit code 1 and Codex surfaces it as
+"SessionStart hook (failed)" alongside the successful one. The
+notification is cosmetic — the reminder still reaches the model.
 
-> **Codex/Windows: matches the v0.1.2-verified form.** The PowerShell
-> entry directly invokes `powershell -File session-end-nudge.ps1` —
-> identical command shape to the v0.1.2 hook that was verified on
-> Codex Desktop 0.142.0-alpha.6 (2026-06-22). The bash entry fails
-> "interpreter not found" on Windows machines without Git Bash; on
-> machines with Git Bash on PATH both entries may inject (the same
-> nudge text — harmless duplicate).
+> **Codex/Windows verified (2026-06-22).** The PowerShell entry is
+> byte-identical to the v0.1.2 hook command verified on Codex
+> Desktop 0.142.0-alpha.6, and on a current Codex Desktop build
+> the `<CONTEXT-UPDATE-REMINDER>` block reaches the agent's
+> context. The bash entry fails on Windows (Codex's marketplace
+> sync converts the script's LF endings to CRLF in its cache,
+> which breaks bash's parsing — the same bug v0.1.2's CHANGELOG
+> documents and the original reason for the PowerShell hook).
+> That's the expected "1 of 2 hooks failed" notification.
 >
-> **Codex/Linux + macOS: fallback implemented, not maintainer-verified.**
-> The bash entry execs `hooks/session-end-nudge` directly, which emits
-> the dual-key JSON (flat `additionalContext` + nested
-> `hookSpecificOutput.additionalContext`) that Codex expects. The
-> PowerShell entry fails "interpreter not found" since `powershell`
-> isn't standard on Unix. Tested via Git Bash (POSIX-bash proxy on
-> Windows); no maintainer device has exercised real Linux/macOS Codex
-> yet. Reports welcome.
+> **Codex/macOS + Linux: bash entry should run, not maintainer-verified.**
+> The bash entry execs `hooks/session-end-nudge` which emits Codex's
+> nested-shape JSON when `PLUGIN_ROOT` is set. The PowerShell entry
+> fails because `powershell` isn't standard on Unix. Same cosmetic
+> notification, inverse cause. No maintainer device has exercised
+> real Linux/macOS Codex yet. Reports welcome.
 
 **Cursor**
 

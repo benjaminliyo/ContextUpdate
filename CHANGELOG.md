@@ -8,59 +8,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Fixed
-- **Complete revert** of the entire Codex/Windows hook stack to its
-  exact v0.1.2 state. `hooks/hooks-codex.json`,
-  `hooks/session-end-nudge.ps1`, `hooks/session-end-nudge`, and
-  `tests/verify-codex-surface.ps1` are now byte-identical to commit
-  `e5fa156` (Release v0.1.2 — Codex/Windows hook via PowerShell).
-  Every intermediate Codex/Windows experiment between v0.1.2 and now
-  (inline `powershell ... || bash ...` chain; cmd/bash polyglot
-  launcher `hooks/codex-launcher.cmd`; dual hook entries; dual-key
-  JSON with literal markers; custom JSON escaper preserving `<>`)
-  failed to inject the `<CONTEXT-UPDATE-REMINDER>` block under the
-  maintainer's current Codex Desktop, including the rebuild of the
-  exact v0.1.2 hook-config shape. This revert restores the bytes
-  that were verified working on Codex Desktop 0.142.0-alpha.6
-  (2026-06-22) so the user can A/B test whether their current Codex
-  Desktop build still honors that exact shape, isolating whether the
-  failure is in our scripts or in Codex's hook ingestion.
-- Codex/macOS+Linux auto-nudge is unsupported again (deferred). The
-  skill still works via native discovery — invoke by message.
-- README.md and docs/installing-per-runtime.md still describe the
-  dual-entry approach. They'll get a follow-up sweep once the
-  Codex/Windows behavior is understood.
-- The interim `hooks/codex-launcher.cmd` polyglot has been removed.
-  Diagnosing with the user revealed that even though the launcher
-  emitted correct stdout in every isolated test (cmd.exe, PowerShell,
-  Git Bash), Codex Desktop completed the hook without injecting context.
-  The direct PowerShell command works without the cmd.exe shim, so the
-  launcher and its `.gitattributes` LF override are gone.
-- Codex SessionStart nudge preserves the literal
-  `<CONTEXT-UPDATE-REMINDER>` marker on Windows. PowerShell 7's
-  `ConvertTo-Json` escaped `<`, `>`, and `'` as `<`, `>`,
-  and `'`; Codex's hook context path can preserve that escaped
-  text, so the model never sees the literal marker. The PowerShell hook
-  writes compact JSON with a small JSON string escaper that leaves the
-  marker literal while still escaping newlines, quotes, backslashes, and
-  control characters.
-- Codex SessionStart hook output includes both top-level
-  `additionalContext` and nested `hookSpecificOutput.additionalContext`
-  for Codex-like environments. Keeps the previously verified nested shape
-  while covering Codex builds that complete the hook but appear to
-  ignore the nested-only payload. The bash `session-end-nudge` and
-  `session-end-nudge.ps1` both emit this dual-key form.
-- `tests/verify-codex-surface.ps1` regression-tests the Codex hook
-  output (literal marker presence, both flat and nested
-  `additionalContext` keys) and asserts `hooks/hooks-codex.json`
-  registers dual `SessionStart` and `UserPromptSubmit` entries with one
-  powershell and one bash command each.
-- Failed Codex/Windows experiments captured for future reference:
-  (a) inline `powershell ... || bash ...` chain — Codex/Windows does
-  not interpret `||` as a shell OR-chain; trailing tokens went to
-  PowerShell as positional args, hook exited 1. (b) cmd/bash polyglot
-  launcher (`hooks/codex-launcher.cmd`) — emitted correct stdout in
-  every isolated test, but Codex Desktop completed the hook without
-  injecting context. Both were superseded by the dual-entry approach.
+- Codex auto wrap-up nudge now reaches both Codex/Windows and the
+  bash-based Codex installs (macOS/Linux, untested) via **two
+  SessionStart entries** in `hooks/hooks-codex.json`. The first
+  entry is the v0.1.2-verified
+  `powershell -NoProfile -ExecutionPolicy Bypass -File
+  hooks/session-end-nudge.ps1`; the second is
+  `bash hooks/session-end-nudge`. On each platform one interpreter
+  is present and that hook injects the nudge; the other fails with
+  exit code 1 and Codex surfaces it as "SessionStart hook (failed)"
+  alongside the successful one — cosmetic only, the reminder still
+  reaches the model.
+- Verified on Codex Desktop / Windows (maintainer's build, 2026-06-22):
+  the PowerShell entry injects the literal
+  `<CONTEXT-UPDATE-REMINDER>` block; the bash entry fails (most
+  likely because Codex's marketplace sync converts the script's LF
+  endings to CRLF in its cache, which is exactly the bug v0.1.2's
+  CHANGELOG documents — bash chokes on parsing — and is also why we
+  use PowerShell on Windows in the first place). Codex/macOS+Linux
+  not maintainer-verified; reports welcome.
+- Walked back every intermediate Codex/Windows experiment that
+  failed during this debugging round: inline
+  `powershell ... || bash ...` chain (Codex/Windows doesn't shell-interpret
+  the command field); cmd/bash polyglot launcher
+  `hooks/codex-launcher.cmd` (emitted correct stdout in every
+  isolated test but Codex Desktop completed the hook without
+  injecting); dual-key JSON via custom escaper in
+  `session-end-nudge.ps1` (no longer present — `.ps1` is byte-identical
+  to v0.1.2 `ConvertTo-Json -Compress`); `UserPromptSubmit` hook
+  entry (no longer present). The methodical bisection from the
+  verified-working v0.1.2 baseline isolated that dual-entry hooks
+  are fine on Codex/Windows; whichever of the other changes was the
+  regression has been removed.
+- `hooks/session-end-nudge.ps1`, `hooks/session-end-nudge`, and
+  `tests/verify-codex-surface.ps1` are byte-identical to commit
+  `e5fa156` (Release v0.1.2). Only `hooks/hooks-codex.json` changes
+  vs v0.1.2 — to add the second bash SessionStart entry.
 - `commands/context-update-config.md` invocation modes rewritten to
   stop implying the slash command works on Codex/others. Slash command
   is Claude Code only; every other agent gets identical functionality
