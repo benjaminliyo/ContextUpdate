@@ -8,16 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Fixed
-- Codex auto wrap-up nudge now works on both Codex/Windows and
-  Codex/macOS+Linux via **dual hook entries** in `hooks/hooks-codex.json`.
-  Two `SessionStart` (and two `UserPromptSubmit`) entries are registered:
-  one calling `powershell -File hooks/session-end-nudge.ps1` directly,
-  one calling `bash hooks/session-end-nudge` directly. On each platform
-  one interpreter is present and injects the nudge; the other fails with
-  "interpreter not found" and Codex surfaces it as a per-entry
-  notification. Direct invocation matches the form that was verified
-  working on Codex/Windows in v0.1.2 — no cmd.exe wrapper in between,
-  no inline shell-chain operators.
+- `hooks/hooks-codex.json` reverted to the v0.1.2 form: single
+  `SessionStart` entry, direct `powershell -NoProfile -ExecutionPolicy
+  Bypass -File hooks/session-end-nudge.ps1`. No `UserPromptSubmit`
+  hook, no bash entry, no launcher. The dual-entry approach (one
+  PowerShell + one bash) was added to also cover Codex/macOS+Linux
+  but did not inject the nudge under Codex Desktop on the
+  maintainer's Windows build during testing. Reverting to the
+  exact shape that was verified working in v0.1.2 (Codex Desktop
+  0.142.0-alpha.6, 2026-06-22) restores a known-good Windows path
+  while the macOS/Linux story remains deferred.
 - The interim `hooks/codex-launcher.cmd` polyglot has been removed.
   Diagnosing with the user revealed that even though the launcher
   emitted correct stdout in every isolated test (cmd.exe, PowerShell,

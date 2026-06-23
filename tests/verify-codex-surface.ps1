@@ -78,18 +78,13 @@ if (Test-Path -LiteralPath $gitBash) {
 
 $hooksCodexPath = Join-Path $Root "hooks/hooks-codex.json"
 $hooksCodex = Get-Content -LiteralPath $hooksCodexPath -Raw | ConvertFrom-Json
-foreach ($event in @("SessionStart", "UserPromptSubmit")) {
-    $entries = $hooksCodex.hooks.$event
-    if ($entries.Count -lt 2) {
-        throw "hooks-codex.json $event must register dual hook entries (PowerShell + bash)"
-    }
-    $commands = ($entries | ForEach-Object { $_.hooks } | ForEach-Object { $_.command }) -join "`n"
-    if ($commands -notmatch "powershell ") {
-        throw "hooks-codex.json $event must include a powershell hook entry"
-    }
-    if ($commands -notmatch "bash ") {
-        throw "hooks-codex.json $event must include a bash hook entry"
-    }
+$sessionStart = $hooksCodex.hooks.SessionStart
+if (-not $sessionStart) {
+    throw "hooks-codex.json must register a SessionStart hook"
+}
+$sessionCommands = ($sessionStart | ForEach-Object { $_.hooks } | ForEach-Object { $_.command }) -join "`n"
+if ($sessionCommands -notmatch "powershell ") {
+    throw "hooks-codex.json SessionStart must include a powershell hook entry"
 }
 
 Write-Host "PASS Codex skill surface includes context-update-config"
