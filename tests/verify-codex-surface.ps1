@@ -43,40 +43,52 @@ if ($hookJson.additionalContext -notmatch "<CONTEXT-UPDATE-REMINDER>") {
     throw "Codex SessionStart hook must also emit top-level additionalContext"
 }
 
-$launcherPath = Join-Path $Root "hooks/codex-launcher.cmd"
-$launcherOutput = & cmd /c $launcherPath
-if ($LASTEXITCODE -ne 0) {
-    throw "Codex launcher Windows branch exited with $LASTEXITCODE"
-}
-
-if ($launcherOutput -notmatch "<CONTEXT-UPDATE-REMINDER>") {
-    throw "Codex launcher Windows branch stdout must include the literal reminder marker"
-}
-
 $gitBash = "C:\Program Files\Git\bin\bash.exe"
 if (Test-Path -LiteralPath $gitBash) {
+    $bashHookPath = Join-Path $Root "hooks/session-end-nudge"
     $previousPluginRoot = $env:PLUGIN_ROOT
+    $previousClaudeRoot = $env:CLAUDE_PLUGIN_ROOT
     try {
         $env:PLUGIN_ROOT = $Root
-        $bashOutput = (& $gitBash $launcherPath) -join "`n"
+        Remove-Item Env:CLAUDE_PLUGIN_ROOT -ErrorAction SilentlyContinue
+        $bashOutput = (& $gitBash $bashHookPath) -join "`n"
         if ($LASTEXITCODE -ne 0) {
-            throw "Codex launcher bash branch exited with $LASTEXITCODE"
+            throw "Codex bash hook exited with $LASTEXITCODE"
         }
     } finally {
         $env:PLUGIN_ROOT = $previousPluginRoot
+        if ($null -ne $previousClaudeRoot) {
+            $env:CLAUDE_PLUGIN_ROOT = $previousClaudeRoot
+        }
     }
 
     if ($bashOutput -notmatch "<CONTEXT-UPDATE-REMINDER>") {
-        throw "Codex launcher bash branch stdout must include the literal reminder marker"
+        throw "Codex bash hook stdout must include the literal reminder marker"
     }
 
     $bashJson = $bashOutput | ConvertFrom-Json
     if ($bashJson.hookSpecificOutput.hookEventName -ne "SessionStart") {
-        throw "Codex launcher bash branch must emit hookSpecificOutput.hookEventName = SessionStart"
+        throw "Codex bash hook must emit hookSpecificOutput.hookEventName = SessionStart"
     }
 
     if ($bashJson.additionalContext -notmatch "<CONTEXT-UPDATE-REMINDER>") {
-        throw "Codex launcher bash branch must also emit top-level additionalContext"
+        throw "Codex bash hook must also emit top-level additionalContext"
+    }
+}
+
+$hooksCodexPath = Join-Path $Root "hooks/hooks-codex.json"
+$hooksCodex = Get-Content -LiteralPath $hooksCodexPath -Raw | ConvertFrom-Json
+foreach ($event in @("SessionStart", "UserPromptSubmit")) {
+    $entries = $hooksCodex.hooks.$event
+    if ($entries.Count -lt 2) {
+        throw "hooks-codex.json $event must register dual hook entries (PowerShell + bash)"
+    }
+    $commands = ($entries | ForEach-Object { $_.hooks } | ForEach-Object { $_.command }) -join "`n"
+    if ($commands -notmatch "powershell ") {
+        throw "hooks-codex.json $event must include a powershell hook entry"
+    }
+    if ($commands -notmatch "bash ") {
+        throw "hooks-codex.json $event must include a bash hook entry"
     }
 }
 

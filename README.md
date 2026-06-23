@@ -108,29 +108,33 @@ Add this repo as a Codex plugin source per the Codex docs for your
 install method. Codex picks up `.codex-plugin/plugin.json` and
 discovers both skills via native lazy skill discovery — they appear
 in the developer prompt's `<skills_instructions>` block with their
-full descriptions. The SessionStart auto wrap-up nudge command in
-`hooks/hooks-codex.json` invokes `hooks/codex-launcher.cmd`, a
-cmd/bash polyglot: on Windows cmd.exe runs the batch portion and
-dispatches to `hooks/session-end-nudge.ps1` (sidestepping Git Bash's
-PATH/line-ending fragility); on Linux/macOS bash treats the cmd
-portion as a heredoc no-op and execs the bash
-`hooks/session-end-nudge` script directly.
+full descriptions. The auto wrap-up nudge in `hooks/hooks-codex.json`
+registers **two** hook entries per event (`SessionStart` and
+`UserPromptSubmit`): one calling `powershell -File
+hooks/session-end-nudge.ps1` directly, one calling `bash
+hooks/session-end-nudge` directly. On each platform one interpreter
+is present and injects the nudge; the other fails with "interpreter
+not found" and Codex surfaces it as a per-entry notification. Direct
+invocation matches the form that was verified working on Codex/Windows
+in v0.1.2 — there is no cmd.exe wrapper script between Codex and
+PowerShell.
 
-> **Codex/Windows: launcher tested in isolation; Codex Desktop
-> re-verification pending.** The Windows branch of the launcher
-> dispatches to the same `session-end-nudge.ps1` command that was
-> Codex Desktop / Windows verified on 0.142.0-alpha.6 in v0.1.2.
-> The new `.cmd` wrapper around it parses correctly via cmd.exe in
-> standalone testing (exit 0, correct JSON), but the polyglot
-> launcher itself has not been exercised under Codex Desktop yet.
+> **Codex/Windows: matches the v0.1.2-verified form.** The PowerShell
+> entry directly invokes `powershell -File session-end-nudge.ps1` —
+> identical command shape to the v0.1.2 hook that was verified on
+> Codex Desktop 0.142.0-alpha.6 (2026-06-22). The bash entry fails
+> "interpreter not found" on Windows machines without Git Bash; on
+> machines with Git Bash on PATH both entries may inject (the same
+> nudge text — harmless duplicate).
 >
 > **Codex/Linux + macOS: fallback implemented, not maintainer-verified.**
-> The polyglot launcher's Unix branch execs `bash hooks/session-end-nudge`,
-> which already emits the correct nested shape when Codex's
-> `PLUGIN_ROOT` is set. Tested via Git Bash (POSIX-bash proxy on
-> Windows) — exit 0, correct JSON. Should work on any Codex install
-> that runs hook commands through a POSIX shell with `bash` available,
-> but no maintainer device has exercised it. Reports welcome.
+> The bash entry execs `hooks/session-end-nudge` directly, which emits
+> the dual-key JSON (flat `additionalContext` + nested
+> `hookSpecificOutput.additionalContext`) that Codex expects. The
+> PowerShell entry fails "interpreter not found" since `powershell`
+> isn't standard on Unix. Tested via Git Bash (POSIX-bash proxy on
+> Windows); no maintainer device has exercised real Linux/macOS Codex
+> yet. Reports welcome.
 
 **Cursor**
 

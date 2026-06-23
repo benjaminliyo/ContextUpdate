@@ -8,10 +8,13 @@
 # output shape. This PowerShell version is native to Windows, has no
 # Git Bash dependency, no /usr/bin PATH issue, and no line-ending fragility.
 #
-# Cross-platform dispatch lives in hooks/codex-launcher.cmd, a cmd/bash
-# polyglot. On Windows cmd.exe runs the batch portion and invokes this
-# .ps1; on Linux/macOS bash parses past the heredoc and execs the bash
-# hooks/session-end-nudge instead.
+# Cross-platform dispatch lives in hooks/hooks-codex.json, which registers
+# two SessionStart (and UserPromptSubmit) hook entries: one calling
+# `powershell -File hooks/session-end-nudge.ps1` (this script) and one
+# calling `bash hooks/session-end-nudge`. On each platform one entry
+# succeeds (interpreter present) and the other fails (interpreter not on
+# PATH). Codex surfaces the failing entry as a notification but the
+# succeeding entry still injects the nudge.
 
 $ErrorActionPreference = 'Stop'
 

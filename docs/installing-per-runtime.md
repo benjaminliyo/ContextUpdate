@@ -184,27 +184,35 @@ Claude Code project that *does* have one.)
   `context-update` and `context-update-config` show up in the
   developer prompt's `<skills_instructions>` block with their full
   descriptions; the agent invokes them when relevant.
-- Hook config: `hooks/hooks-codex.json` (matcher
-  `startup|resume|clear`).
-- Hook command: invokes `hooks/codex-launcher.cmd`, a cmd/bash
-  polyglot. On Windows cmd.exe runs the batch portion and dispatches
-  to `hooks/session-end-nudge.ps1`; on Linux/macOS bash treats the
-  cmd portion as a heredoc no-op and execs
-  `hooks/session-end-nudge` directly. Either path produces the nested
-  `hookSpecificOutput.additionalContext` shape Codex expects.
-- An earlier attempt inlined `powershell … || bash …` into the
-  `command` field directly. That regressed Codex/Windows because
-  Codex/Windows doesn't pass the `command` value through a shell
-  that interprets `||` — the trailing tokens went to PowerShell as
-  positional args and the hook exited 1. The launcher script avoids
-  any inline shell syntax.
+- Hook config: `hooks/hooks-codex.json` registers **dual entries** per
+  event (`SessionStart` with matcher `startup|resume|clear`, plus
+  `UserPromptSubmit`). Each event gets one entry calling `powershell
+  -File hooks/session-end-nudge.ps1` directly, and one entry calling
+  `bash hooks/session-end-nudge` directly. On each platform one
+  interpreter is present and that hook injects the nudge; the other
+  fails with "interpreter not found" and Codex surfaces it as a
+  per-entry notification.
+- Both `hooks/session-end-nudge.ps1` and `hooks/session-end-nudge`
+  emit dual-key JSON (top-level `additionalContext` AND nested
+  `hookSpecificOutput.additionalContext`), with the literal
+  `<CONTEXT-UPDATE-REMINDER>` marker preserved (not escaped to
+  `<`/`>`). Codex builds have honored different keys; emitting
+  both maximizes compatibility.
+- Two failed approaches were tried before settling on dual entries:
+  (a) inline `powershell … || bash …` in the `command` field —
+  Codex/Windows doesn't interpret `||` as a shell OR-chain; the trailing
+  tokens went to PowerShell as positional args and the hook exited 1.
+  (b) `hooks/codex-launcher.cmd`, a cmd/bash polyglot — emitted correct
+  stdout in every isolated test (cmd.exe, PowerShell, Git Bash), but
+  Codex Desktop completed the hook without injecting the context. Direct
+  invocation (matching the v0.1.2-verified form) is what works.
 
 ### Verification status
 
 | Platform | Status |
 |---|---|
-| Codex Desktop / Windows | The Windows branch of the polyglot launcher dispatches to `session-end-nudge.ps1`, which was Codex Desktop / Windows verified on 0.142.0-alpha.6 in v0.1.2 (`<CONTEXT-UPDATE-REMINDER>` reached the agent). The new `.cmd` launcher itself parses correctly via cmd.exe in standalone testing (exit 0, correct JSON); end-to-end Codex Desktop re-verification after the launcher swap is pending. |
-| Codex / Linux + macOS | Fallback implemented via `hooks/codex-launcher.cmd`'s bash branch (heredoc-no-op past the cmd portion, then `exec bash hooks/session-end-nudge`). Expected to work on any Codex install that runs hook commands through a POSIX shell with `bash` available. Not maintainer-verified — no Linux/macOS Codex device exercised. Reports welcome. |
+| Codex Desktop / Windows | The PowerShell entry directly invokes `powershell -File session-end-nudge.ps1` — identical command shape to the v0.1.2 hook verified on Codex Desktop 0.142.0-alpha.6 (2026-06-22). End-to-end re-verification of the dual-entry form is pending user test. The bash entry fails "interpreter not found" on machines without Git Bash on PATH. |
+| Codex / Linux + macOS | The bash entry execs `hooks/session-end-nudge` directly, which emits the dual-key JSON Codex expects. Tested via Git Bash (POSIX-bash proxy on Windows). Not maintainer-verified — no real Linux/macOS Codex device has exercised it. Reports welcome. The PowerShell entry fails since `powershell` isn't standard on Unix. |
 
 Install by adding this repo as a Codex plugin source per the Codex docs
 for your install method.
@@ -219,15 +227,14 @@ which breaks bash's parsing of the elif chain that selects the
 output JSON shape. We diagnosed three layers — `/usr/bin` not on
 PATH, Codex JSON shape mismatch, and CRLF corruption — before
 landing on PowerShell as the Windows fix. PowerShell is native
-Windows, has no Git Bash dependency, no `/usr/bin` PATH issue, no
-line-ending fragility, and emits proper UTF-8 JSON via
-`[System.IO.File]::ReadAllText` and `ConvertTo-Json -Compress`.
+Windows, has no Git Bash dependency, no `/usr/bin` PATH issue, and
+no line-ending fragility. The PowerShell hook writes compact dual-key
+JSON via a small in-script string escaper that leaves the
+`<CONTEXT-UPDATE-REMINDER>` marker literal while still escaping
+newlines, quotes, backslashes, and control characters.
 Linux/macOS were never hit by the marketplace-sync CRLF issue, so
-the bash script works fine there; the bash branch of
-`hooks/codex-launcher.cmd` (a cmd/bash polyglot using the
-`: << 'CMDBLOCK' … CMDBLOCK` heredoc trick) is the dispatch. The
-launcher is pinned to LF in `.gitattributes` so the heredoc
-terminator parses correctly on Unix.
+`hooks/session-end-nudge` (bash) is the entry there and emits the
+same dual-key JSON shape.
 
 ## Cursor
 

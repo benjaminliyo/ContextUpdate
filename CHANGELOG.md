@@ -8,60 +8,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Fixed
-- Codex SessionStart nudge now preserves the literal
+- Codex auto wrap-up nudge now works on both Codex/Windows and
+  Codex/macOS+Linux via **dual hook entries** in `hooks/hooks-codex.json`.
+  Two `SessionStart` (and two `UserPromptSubmit`) entries are registered:
+  one calling `powershell -File hooks/session-end-nudge.ps1` directly,
+  one calling `bash hooks/session-end-nudge` directly. On each platform
+  one interpreter is present and injects the nudge; the other fails with
+  "interpreter not found" and Codex surfaces it as a per-entry
+  notification. Direct invocation matches the form that was verified
+  working on Codex/Windows in v0.1.2 — no cmd.exe wrapper in between,
+  no inline shell-chain operators.
+- The interim `hooks/codex-launcher.cmd` polyglot has been removed.
+  Diagnosing with the user revealed that even though the launcher
+  emitted correct stdout in every isolated test (cmd.exe, PowerShell,
+  Git Bash), Codex Desktop completed the hook without injecting context.
+  The direct PowerShell command works without the cmd.exe shim, so the
+  launcher and its `.gitattributes` LF override are gone.
+- Codex SessionStart nudge preserves the literal
   `<CONTEXT-UPDATE-REMINDER>` marker on Windows. PowerShell 7's
-  `ConvertTo-Json` escaped `<`, `>`, and `'` as `\u003c`, `\u003e`,
-  and `\u0027`; Codex's hook context path can preserve that escaped
+  `ConvertTo-Json` escaped `<`, `>`, and `'` as `<`, `>`,
+  and `'`; Codex's hook context path can preserve that escaped
   text, so the model never sees the literal marker. The PowerShell hook
-  now writes compact JSON with a small JSON string escaper that leaves
-  the marker literal while still escaping newlines, quotes, backslashes,
-  and control characters.
-- `hooks/codex-launcher.cmd` Unix branch no longer assumes `dirname` or
-  `bash` are already on `PATH`. It prepends `/usr/bin` when available
-  and execs the current bash binary via `$BASH`, matching the
-  self-contained PATH repair already present in `hooks/session-end-nudge`.
-- `tests/verify-codex-surface.ps1` now regression-tests the Codex
-  SessionStart hook output, including literal marker presence, nested
-  `hookSpecificOutput.additionalContext`, the Windows launcher branch,
-  and the bash launcher branch when Git Bash is installed.
-- Codex SessionStart hook output now includes both top-level
+  writes compact JSON with a small JSON string escaper that leaves the
+  marker literal while still escaping newlines, quotes, backslashes, and
+  control characters.
+- Codex SessionStart hook output includes both top-level
   `additionalContext` and nested `hookSpecificOutput.additionalContext`
-  for Codex-like environments. This keeps the previously verified nested
-  shape while covering Codex builds that complete the hook but appear to
-  ignore the nested-only payload.
-- Codex auto wrap-up nudge now reaches Codex on Linux/macOS, not just
-  Windows. `hooks/hooks-codex.json` invokes a new
-  `hooks/codex-launcher.cmd` polyglot: on Windows cmd.exe runs the
-  batch portion and dispatches to `hooks/session-end-nudge.ps1`; on
-  Linux/macOS bash treats the cmd portion as a heredoc no-op and
-  execs `hooks/session-end-nudge` directly, which already emits the
-  nested `hookSpecificOutput.additionalContext` shape Codex expects.
-  Both branches tested in isolation (Windows cmd.exe and POSIX bash
-  via Git Bash): each emits the correct JSON with exit 0. Codex
-  Desktop end-to-end re-verification on Windows is pending after the
-  launcher swap; Codex/Linux+macOS remains not maintainer-verified
-  on a real device (reports welcome).
-- The earlier `powershell ... || bash ...` inline-chain attempt (first
-  shipped post-v0.1.2) regressed Codex/Windows because whatever Codex
-  on Windows uses to invoke the `command` string does not interpret
-  `||` as a shell OR-chain — the trailing tokens were passed through
-  to PowerShell as positional args, breaking the SessionStart hook
-  with exit code 1. The polyglot launcher avoids any inline shell
-  syntax: the `command` field is now a single quoted path, exactly
-  like every other runtime's hook config.
-- `.gitattributes` adds an LF override for `hooks/codex-launcher.cmd`
-  (the default `*.cmd text eol=crlf` would have broken the bash
-  heredoc terminator on Unix checkouts).
+  for Codex-like environments. Keeps the previously verified nested shape
+  while covering Codex builds that complete the hook but appear to
+  ignore the nested-only payload. The bash `session-end-nudge` and
+  `session-end-nudge.ps1` both emit this dual-key form.
+- `tests/verify-codex-surface.ps1` regression-tests the Codex hook
+  output (literal marker presence, both flat and nested
+  `additionalContext` keys) and asserts `hooks/hooks-codex.json`
+  registers dual `SessionStart` and `UserPromptSubmit` entries with one
+  powershell and one bash command each.
+- Failed Codex/Windows experiments captured for future reference:
+  (a) inline `powershell ... || bash ...` chain — Codex/Windows does
+  not interpret `||` as a shell OR-chain; trailing tokens went to
+  PowerShell as positional args, hook exited 1. (b) cmd/bash polyglot
+  launcher (`hooks/codex-launcher.cmd`) — emitted correct stdout in
+  every isolated test, but Codex Desktop completed the hook without
+  injecting context. Both were superseded by the dual-entry approach.
 - `commands/context-update-config.md` invocation modes rewritten to
-  stop implying the slash command works on Codex/others. Slash
-  command is Claude Code only; every other agent gets identical
-  functionality via the sibling `context-update-config` skill or
-  natural language.
+  stop implying the slash command works on Codex/others. Slash command
+  is Claude Code only; every other agent gets identical functionality
+  via the sibling `context-update-config` skill or natural language.
 - `AGENTS.md` rewritten as a discovery shim that references CLAUDE.md
-  as canonical. The previous "intentionally identical" claim was
-  never true.
-- `docs/installing-per-runtime.md` Claude.ai section now documents
-  both the slim `context-update-project` and the full `context-update`
+  as canonical. The previous "intentionally identical" claim was never
+  true.
+- `docs/installing-per-runtime.md` Claude.ai section now documents both
+  the slim `context-update-project` and the full `context-update`
   builder scripts, with output zip names. Troubleshooting line for
   "skill doesn't appear" now lists both top-level entries.
 
