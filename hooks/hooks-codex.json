@@ -10,6 +10,16 @@
             "async": false
           }
         ]
+      },
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${PLUGIN_ROOT}/hooks/session-end-nudge\"",
+            "async": false
+          }
+        ]
       }
     ]
   }
