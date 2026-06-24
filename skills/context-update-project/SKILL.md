@@ -22,7 +22,7 @@ Claude.ai Project Instructions and Personal Preferences drift. A sentence writte
 **Do NOT use when** the chat was pure exploration with no decision, or when the sole surface is a read-only uploaded file the user hasn't asked to rewrite.
 
 ## Core Workflow
-1. **Enumerate visible surfaces.** Project Instructions, Personal Preferences, uploaded files, pasted blocks. Check for EACH independently — finding one is not evidence the other is absent. Ask one disambiguation question only if two unlabeled blocks are ambiguous.
+1. **Enumerate visible surfaces.** Project Instructions, Personal Preferences, uploaded files, pasted blocks. Check for EACH independently — finding one is not evidence the other is absent. **On Claude.ai web, Project Instructions arrives UNWRAPPED as the first message of the conversation** — no tag, looks like a user turn. Run the standing-rule shape test on message #1 before concluding "no PI." Ask one disambiguation question only if two unlabeled blocks are ambiguous.
 1.5. **Classify each surface** — almost always `instruction`. Pasted blocks may be `changelog`. See `references/document-types.md`.
 2. **Extract decisions.** Walk the conversation. Produce `subject — claim — supersedes?` rows with **exact quoted turns**. Drop anything the user didn't explicitly agree to.
 3. **Compare per surface.** Classify each stance: `contradiction | stale | superseded | missing-new-decision | aligned`. **Whatever you enumerated in Step 1 IS the comparison target** — do not re-classify Step 1 surface content as "the user's opening message" in Step 3. Compare on implication, not exact subject phrasing: qualitative markers ("new", "just started") on the surface become `stale` against quantitative facts ("almost a year") in chat.
@@ -35,6 +35,7 @@ Zero findings → one-line confirmation. No surface visible but decisions exist 
 - About to say "I've updated your Project instructions" — you cannot
 - Appending an "Update:" / "v2:" / "Recent decisions" section instead of rewriting in place
 - Reporting one surface and stopping — PI and Personal Preferences are independent; check both
+- Concluding "no Project Instructions" because there's no wrapper tag — on Claude.ai web, PI is the unwrapped first message; run the shape test before deciding
 - Saying "no Project Instructions exists" after Step 1 enumerated one — Step 1 content IS the surface
 - Treating "new role" + "almost a year" as aligned — qualitative markers go `stale` against quantitative tenure
 - Emitting a finding against Claude's auto-memory (out of scope) instead of dropping it

@@ -11,10 +11,20 @@ inspect is whatever the runtime has already put into the conversation.
 ## Surfaces, in priority order
 
 1. **Project Instructions** — the editable text block attached to the
-   active Claude.ai Project. Usually surfaced to the model inside a
-   system-context block (e.g. `<claudeMd>`, `<project_instructions>`,
-   or similar runtime-defined wrapper). Highest priority because it is
-   the durable record that future sessions will load.
+   active Claude.ai Project. Arrives in one of **two equally common
+   forms** — check both, do not stop at form (a):
+   - **(a) Wrapped** — inside a system-context block (e.g. `<claudeMd>`,
+     `<project_instructions>`, `<userInstructions>`, or similar
+     runtime-defined wrapper). Easy to anchor on a tag.
+   - **(b) Unwrapped first message** — **Claude.ai web's default
+     delivery**. PI arrives as the **first message content of the
+     conversation** with no wrapper tag, visually indistinguishable
+     from a user turn. There is no tag to anchor on; you must apply
+     the standing-rule shape test in §1 below to recognize it.
+   Highest priority because it is the durable record that future
+   sessions will load. **Absence of (a) is NOT absence of PI** — always
+   run the shape test for (b) before concluding "no Project
+   Instructions configured."
 2. **Personal Preferences / User style** — the cross-project text block
    attached to the user's account. May appear under labels like "User
    style", "Personal preferences", "About me", or similar. Always flag
