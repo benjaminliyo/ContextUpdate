@@ -64,6 +64,28 @@ Instructions vs. the user's first chat turn (e.g. the user pasted their
 instructions inline as a chat message), ask one disambiguation question
 before continuing — do not silently demote.
 
+### Inverse rule: do not silently SKIP the first message either
+
+The mirror failure of "Step 1 enumerates → Step 3 demotes" is "Step 1
+never enumerates at all because the first message looked like a normal
+user turn." On Claude.ai web, Project Instructions arrives unwrapped as
+the first message — there is no tag to anchor on, so the model reads it
+as chat and proceeds without ever listing it as a surface.
+
+Mandatory Step 1 pass: examine the first message content of the
+conversation. If it has **standing-rule shape** (recurring scope,
+durable output constraints, role/situation in standing terms,
+declarative prose without a one-shot deliverable — see
+`discovery-rules.md` §1 "Claude.ai web: unwrapped first-message PI"),
+enumerate it as `source: project-instructions`. Demote only when it is
+clearly a single ad-hoc request.
+
+If Personal Preferences was detected but no PI candidate emerges from
+the first-message scan, then — and only then — emit the
+"does this Project have instructions configured?" disambiguation
+prompt. Asking the user is the fallback, not the substitute for the
+scan.
+
 ---
 
 ## Step 1.5 — Classify each surface

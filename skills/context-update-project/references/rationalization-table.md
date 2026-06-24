@@ -15,7 +15,9 @@ do not appear in the coding-agent variant.
 | "I'll skip the disambiguation question to save a turn." | One question is cheaper than misattributing a finding to the wrong surface. |
 | "I see Personal Preferences — that's the surface." **(web-specific, real failure)** | Personal Preferences and Project Instructions are independent surfaces and almost always coexist. Re-scan for a work-describing block (role, domain, stack, scope) before concluding "no Project Instructions." |
 | "There's no `<projectInstructions>` wrapper, so it's not there." **(web-specific)** | Runtimes inject the Project surface under varying wrappers (`<claudeMd>`, `<userInstructions>`, sometimes inline). Classify by content (describes the work? → Project) not by tag name. |
+| "The first message is the user's opening turn, not Project Instructions." **(web-specific, real failure)** | On Claude.ai web, Project Instructions ships unwrapped as the first message — that IS the surface. Apply the standing-rule shape test (recurring scope, durable constraints, role in standing terms, no one-shot deliverable). Demote to "user's opening turn" only when it's clearly a single ad-hoc request. |
 | "If both surfaces were present, they'd be obviously labeled." | They often aren't. Test by content: who/what does the block describe? User → Personal; work → Project. |
+| "Personal Preferences was detected, so I'll just ask the user whether PI is configured." **(web-specific)** | Asking is the fallback, not the substitute for scanning. Run the first-message standing-rule test first; only ask if that test produces no PI candidate. |
 
 ## Decision-extraction phase
 

@@ -81,11 +81,54 @@ block before the first user turn. Look for:
   without a wrapper tag, this content is Project Instructions if it
   describes the work rather than the user's communication preferences.
 
+#### Claude.ai web: unwrapped first-message PI (default case)
+
+On Claude.ai web, **Project Instructions has no wrapper tag**. It
+arrives as the **first message content** of the conversation,
+visually indistinguishable from a regular user turn. Personal
+Preferences gets a recognizable surface marker and is detected
+normally; PI does not.
+
+Default rule: **treat the first message content as a Project
+Instructions candidate** and enumerate it as `source:
+project-instructions` in Step 1. Demote it to "user's opening turn"
+only if it is clearly a single ad-hoc request — one focused ask, no
+durable rules.
+
+Standing-rule shape (= it IS Project Instructions, even though it
+looks like chat):
+
+- Sets ongoing output constraints ("keep answers under 600 words",
+  "每天分成上午/下午/晚上", "always include cost per person").
+- Describes recurring scope or a category of work ("help me plan
+  Tokyo trips", "review SQL migrations I send you"), not a one-off
+  ("plan tomorrow's meeting agenda").
+- States user identity/situation in standing terms ("this is my
+  first time in Japan", "I don't speak Japanese", "I'm a junior
+  actuary").
+- Multiple paragraphs of declarative prose with no specific
+  deliverable ask, OR a deliverable ask plus standing rules attached.
+
+One-off chat turn (= NOT Project Instructions):
+
+- Single focused request with a concrete deliverable
+  ("write a function that parses this CSV").
+- Time-bound to this session ("for tomorrow's meeting", "today",
+  "right now").
+- References specific files/topics rather than setting global rules.
+
 If Personal Preferences IS visible but no obvious Project Instructions
-wrapper is present, re-scan: was there a *second* untagged block of
-work-describing content? Many runtimes inject Project Instructions
-inline without a distinct wrapper. Do not conclude "no Project
-Instructions" until you've checked for inline content.
+wrapper is present, **the first message is your PI candidate** — apply
+the standing-rule shape test above. Do not conclude "no Project
+Instructions" without running that test on the first message.
+
+**Red flag for the copy-paste step:** the revised PI block must contain
+ONLY the PI you enumerated in Step 1. Never include the user's actual
+chat turns (the one-shot ask, follow-up questions, decisions made later
+in conversation) in the body of the revised PI surface. Those are
+inputs to Step 2 (decisions), not surface content. If a chat decision
+changes a PI rule, the new RULE replaces the stale rule in-place — the
+chat quote does not get pasted in verbatim.
 
 ### Editable?
 **Yes — by the user, manually.** The model cannot write to this surface.
