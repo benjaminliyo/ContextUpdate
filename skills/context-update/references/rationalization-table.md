@@ -61,16 +61,21 @@ by the phase of the workflow where they appear.
 | "Severity will help the user prioritize." | Severity is internal scaffolding. The two-step format hides it. |
 | "I'll show the exact diff so the user can review precisely." | The per-file section shows one-line descriptions only. Detailed diffs / proposed replacements stay internal until approval. |
 | "The quote is long; I'll truncate." | Truncate and you've stopped quoting. Quote stays internal anyway — the user-facing line is the description, not the snippet. |
-| "I'll show per-finding `[ y / n / edit / skip ]` prompts — clearer." | Deprecated. Use the per-file two-step (`yes` / `no` / partial / reword). Per-finding bracket prompts created CLI-style noise in testing. |
+| "I'll show per-finding `[ y / n / edit / skip ]` prompts — clearer." | Deprecated. Use the consolidated report's Apply-all / Review per-file / Skip-all (`report-format.md`). Per-finding bracket prompts created CLI-style noise in testing. |
+| "Per-file reports are clearer than one giant message." | The consolidated message IS the design. Per-file emission means N round-trips and N rubber-stamps — exactly the friction we removed when testing on Codex showed users skim-yessing through 5+ prompts. |
 
 ## Apply phase
 
 | Excuse | Reality |
 |---|---|
-| "`approve-high` means all highs including frozen." | Frozen still requires per-file confirmation. |
+| "`approve-high` means all highs including frozen." | Frozen still requires per-file confirmation, even under `apply all`. |
 | "The file barely changed; the diff should still apply." | If the file changed since the report, abort and re-report. |
 | "I'll fix that adjacent typo while I'm here." | Out of scope. Surgical edits only. |
-| "User said 'apply all' — that covers everything." | Confirm 'all' explicitly; still gate frozen files. |
+| "User said 'apply all' — that covers frozen too." | No. `apply all` excludes frozen by design. Each frozen file needs its own per-file re-confirm after `--override-frozen`. |
+| "Iron law says per-file approval — I can't batch." | Old wording. The current rule is "every edit visible before any write." One `apply all` after the consolidated report satisfies that for non-frozen files. See `SKILL.md:13`. |
+| "User invoked `/context-update` — that's consent enough, skip the report." | The invocation is consent to *run the check*, not consent to apply. The consolidated report IS the consent surface. No report, no write. |
+| "Long list of files — I'll skip the report and just stream Edit calls; the runtime will gate them." | The runtime's per-write approval is a safety net, not the consent surface. The user has to see every diff in one place to approve meaningfully. Without the report they're rubber-stamping. |
+| "I'll apply one file first to show progress, then ask about the rest." | The report shows all files first. Splitting the approval defeats the consolidated-report design and reintroduces the per-file fatigue we just removed. |
 
 ## Config persistence (Step 1 & Step 7)
 

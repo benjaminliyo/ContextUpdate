@@ -25,7 +25,9 @@
 
 ## What we will not accept
 
-- Removing the per-file approval gate.
+- Removing the "every edit visible before any write" gate. The default
+  is one consolidated report → one `apply all`, with per-file review
+  available as a fallback; removing the gate entirely is out.
 - Frontmatter `description` fields that summarize workflow.
 - Hidden network calls or telemetry.
 

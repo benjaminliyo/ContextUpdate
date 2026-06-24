@@ -50,44 +50,39 @@ Turn #20, user:
   supersedes?: "flat error object"
 ```
 
-## Step 3 finding
+## Step 3 finding (internal)
 
 Category: `superseded`.
 Severity: `high` (default for superseded, plus per-watch override).
 
-## Step 5 report fragment
+Internal scaffolding only — does NOT appear in user-facing output.
+
+## Step 5 consolidated report fragment
 
 ````markdown
-## Finding 1 — [high] superseded
-**File:** `docs/plans/api-refactor.md`
-**Category:** superseded
-**Decision source:** turn #18 — user: "the SDK team needs envelope-wrapped errors. switch to { \"error\": { code, message } }."
+# Context update — 1 change across 1 file
 
-**Current text (lines 62–68):**
-```
-Errors are returned flat:
+## `docs/plans/api-refactor.md` (1 change)
+1. **error envelope** — flat → envelope-wrapped per the SDK-team requirement.
 
-```json
-{ "code": "INVALID_INPUT", "message": "..." }
-```
-
-No wrapping object; clients branch on `code`.
-```
-
-**Proposed replacement:**
-```
-Errors are wrapped:
-
-```json
-{ "error": { "code": "INVALID_INPUT", "message": "..." } }
+```diff
+- Errors are returned flat:
+-
+- ```json
+- { "code": "INVALID_INPUT", "message": "..." }
+- ```
+-
+- No wrapping object; clients branch on `code`.
++ Errors are wrapped:
++
++ ```json
++ { "error": { "code": "INVALID_INPUT", "message": "..." } }
++ ```
++
++ Clients branch on `error.code`.
 ```
 
-Clients branch on `error.code`.
-```
-
-**Rationale:** Conversation 2026-06-19 reversed the flat-envelope decision
-to satisfy SDK requirements.
-**Apply?** [ y / n / edit / skip ]
+Apply all 1 change? Reply **apply all**, **review**, or **skip all**.
 ````
 
 ## Notes
@@ -98,3 +93,6 @@ to satisfy SDK requirements.
 - Because the watch entry sets `owns = ["error envelope"]`, even if the
   plan said nothing about envelopes, an *absent* decision would have
   surfaced as `missing-new-decision`.
+- The plan is a `plan` doc-type, so the strategy is "revise affected
+  section in place" — NOT append a v2 header. The whole section is
+  rewritten because the new and old envelopes can't coexist.

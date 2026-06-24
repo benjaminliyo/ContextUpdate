@@ -10,7 +10,7 @@ Reusable-context files drift. A statement in CLAUDE.md from three weeks ago can 
 
 **Core principle:** conversation is the source of truth for recent decisions; context files are the durable record. When they disagree, surface the disagreement.
 
-**Iron Law:** never modify a watched context file without explicit user "apply" decision per file.
+**Iron Law:** every proposed edit must be visible to the user in the report before any write, and the user must explicitly approve. Default is one consolidated report → one approve-all; per-file approval is the opt-in fallback.
 
 ## When to Use
 - User reverses an earlier preference ("we don't do X anymore", "switch to Y")
@@ -27,11 +27,11 @@ Reusable-context files drift. A statement in CLAUDE.md from three weeks ago can 
 2. Extract conversation decisions as `subject — claim — supersedes?`, with the exact turn quoted.
 3. For each watched file, read fresh and classify each decision's stance: contradiction, stale, superseded, missing-new-decision, aligned.
 4. Categorize and assign severity (`high|medium|low`) — internal, not shown to user.
-5. Present the per-file report (`references/report-format.md`) with two-step approval per file: summary list, then `yes` / `no` / partial / reword. Files with zero findings are not mentioned.
-6. Apply approved edits. Re-read before writing; abort if file changed. The proposed text was shaped by the file's type — apply as written.
+5. Present one consolidated report (`references/report-format.md`) covering every file with findings; render each diff inline as a fenced ` ```diff ` block. Ask once: **Apply all** / **Review per-file** / **Skip all**. Zero-findings files are silent. `Review per-file` drops into the per-file fallback loop.
+6. Apply approved edits in order. Re-read each file immediately before writing; abort that finding if the file changed since the report. Frozen files stay gated — `Apply all` excludes them; `--override-frozen` + per-file re-confirm is the only path in.
 7. If — and only if — Step 1 or 5 queued config edits, ask once before writing (via AskUserQuestion on runtimes that have it). No queue = no prompt.
 
-**UI affordances.** When the runtime exposes an interactive question tool (Claude Code / Kimi: `AskUserQuestion`), use it for the per-file Apply? prompt and the Step 7 confirm, and render each proposed change as a fenced ` ```diff ` block. On runtimes without it, fall back to the typed markdown options in `references/report-format.md`.
+**UI affordances.** When the runtime exposes `AskUserQuestion` (Claude Code / Kimi), use it for the Apply-all prompt and the Step 7 confirm. On Codex / Cursor / Copilot CLI / Claude.ai web, fall back to the typed prompt in `references/report-format.md`. The runtime's per-write approval (e.g. Codex `apply_patch`) is a safety net, not the consent surface — the user already approved every diff once in the consolidated report.
 
 ## Quick Reference
 | Conversation signal | Likely category |
@@ -45,9 +45,10 @@ Reusable-context files drift. A statement in CLAUDE.md from three weeks ago can 
 ## Red Flags — STOP
 - Appending to a non-changelog file (creates a chronicle instead of current state)
 - Categorizing without quoting the contradicting turn
-- Touching a `frozen=true` path
-- "I'll just fix the obvious one" — every file needs explicit approval
-- Showing per-finding `[ y / n / edit / skip ]` prompts (deprecated — use per-file two-step)
+- Touching a `frozen=true` path without `--override-frozen` + per-file re-confirm (frozen is the one case where batch `Apply all` does NOT cover it)
+- "I'll just fix the obvious one" — every edit must appear in the report and be approved before write
+- Calling `Edit` before the consolidated report has been shown and approved — the report is the consent surface, not a formality
+- Showing per-finding `[ y / n / edit / skip ]` prompts (deprecated — use the consolidated report's Apply-all / Review per-file / Skip-all)
 - Treating qualitative markers ("junior", "new", "just started") in the file as aligned with quantitative facts in chat — that's `stale`, not `aligned`
 
 ## Rationalizations

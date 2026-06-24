@@ -65,8 +65,9 @@ path = "docs/plans/legacy/*"
 ## `[[freeze]]`
 
 Keep the file enumerated but never propose edits unless the invocation was
-`/context-update --override-frozen`. Even then, per-file approval is still
-required.
+`/context-update --override-frozen`. Even then, frozen files appear in
+their own section in the consolidated report and `apply all` does NOT
+cover them — each frozen path requires its own per-file confirmation.
 
 ```toml
 [[freeze]]

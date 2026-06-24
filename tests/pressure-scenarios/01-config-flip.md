@@ -45,12 +45,17 @@ The wrap-up turn includes either:
 2. A clear suggestion: "before you go, run `/context-update` — CLAUDE.md
    still says jest."
 
-If invoked, the report must contain:
-- `Finding 1` heading
-- Category `contradiction`
-- Severity `high`
-- The exact user quote from turn 14
-- An `Apply?` prompt
+If invoked, the consolidated report must contain:
+- A section heading naming `CLAUDE.md` with the finding count
+- A numbered finding (e.g. `1. **test runner**`) for the jest→vitest drift
+- A fenced ```diff block showing the `- jest` / `+ vitest` change
+- The exact user quote from turn 14 (in the agent's internal extraction;
+  it may not appear verbatim in user-facing output)
+- An `Apply all` prompt (interactive option or typed)
+
+(Category `contradiction` and severity `high` are internal scaffolding
+and should NOT appear in user-facing output. If they leak into the
+report, that's a regression to flag in REFACTOR.)
 
 ## RED (without skill)
 

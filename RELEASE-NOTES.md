@@ -16,7 +16,10 @@ First public scaffold of ContextUpdate.
 - Reference-following from those files at depth 2 with cycle protection.
 - TOML config (`.contextupdate.toml`) supporting `[[watch]]`,
   `[[ignore]]`, `[[freeze]]`, and `[discovery]`.
-- Per-file approval gate on every edit. No auto-write.
+- Consolidated-report approval gate: every proposed edit is shown in one
+  report (with inline diffs), then a single `apply all` writes the
+  approved set. Per-file review is available as a fallback. No
+  auto-write.
 - SessionStart-planted self-reminder so a wrap-up turn considers the skill
   before declaring done.
 
@@ -36,5 +39,6 @@ First public scaffold of ContextUpdate.
 The "Verification" section in the build plan is the end-to-end check:
 seed `~/scratch/cu-verify/` with a `CLAUDE.md` saying "we use jest" and a
 plan saying "REST only, no GraphQL"; have a conversation that switches to
-vitest and adds GraphQL; confirm 2 high findings with per-file `Apply?`
-prompts; verify idempotency on re-run and `[[freeze]]` behavior.
+vitest and adds GraphQL; confirm 2 high findings rendered in the
+consolidated report with inline diffs, the single Apply-all prompt,
+idempotency on re-run, and `[[freeze]]` behavior.

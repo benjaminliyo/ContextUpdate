@@ -22,8 +22,8 @@ that may need to catch up.
 
 ## No auto-write
 
-The skill never modifies a watched file without explicit per-file
-approval. There are two reasons:
+The skill never modifies a watched file without explicit user approval
+of every proposed edit. There are two reasons:
 
 1. **Blast radius.** `~/.claude/CLAUDE.md` and similar personal files
    affect every project the user touches. A wrong edit is silently
@@ -32,8 +32,21 @@ approval. There are two reasons:
    corruption: an over-eager edit looks authoritative to the next session,
    which then drifts further from user intent without anyone noticing.
 
-The per-file approval gate is the iron law. The rationalization table
-exists primarily to make sure agents don't talk themselves out of it.
+The gate is "every edit visible in a consolidated report before any
+write." Default is one report → one `apply all` (one consent, all
+diffs already shown). Per-file approval is the opt-in fallback for
+users who want surgical control. Either path satisfies the iron law;
+both make the user see every diff before any write happens.
+
+The earlier per-file-only gate was relaxed after Codex testing showed
+that long file lists trained users to skim-yes through 5+ prompts —
+which is functionally indistinguishable from auto-apply. The
+consolidated report puts every diff in front of the user once, and
+asks once. That is the strongest version of the safety property the
+iron law was trying to enforce.
+
+The rationalization table exists primarily to make sure agents don't
+talk themselves out of showing the report.
 
 ## Skill, not runtime code
 

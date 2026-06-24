@@ -386,5 +386,8 @@ v1.0.8–v1.0.10 and never reached the agent).
    appears in the model's context on the first turn.
 4. Run scenario 01 manually (switch to vitest mid-conversation, then
    wrap up).
-5. Confirm the report contains: `Finding`, `contradiction`, `Apply?`,
-   and the exact user quote.
+5. Confirm the consolidated report contains: a numbered finding for
+   the jest→vitest drift, a fenced ```diff block showing the change,
+   and an `Apply all` prompt. The exact user quote may not appear
+   verbatim in user-facing output (it lives in the agent's internal
+   extraction).

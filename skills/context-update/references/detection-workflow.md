@@ -201,25 +201,39 @@ Overrides:
 
 ---
 
-## Step 5 — Report
+## Step 5 — Consolidated Report
 
-Use the template in `report-format.md`. The user-facing output is a
-brief per-file summary with two-step approval:
+Use the template in `report-format.md`. The user-facing output is one
+consolidated report listing every file with findings and every diff
+inline, followed by a single Apply-all prompt.
 
-**Step A** — for each file with findings, emit a section listing
-findings by number with a 2–5 word subject and a one-line description.
-Internal scaffolding (category, severity, exact line ranges, exact
-quoted snippets, proposed replacements) is computed but NOT shown.
+**Step A** — emit the consolidated report. For each file with one or
+more findings, render a section: heading, numbered findings each with a
+2–5 word subject, one-line description, and a fenced ```diff block
+showing exact current snippet (`-`) and exact proposed replacement
+(`+`). Internal scaffolding (category, severity, exact line ranges,
+turn quotes) is computed but NOT shown.
 
-**Step B** — interpret reply per file:
-- `yes` / `apply all` — apply every finding in this file.
-- `no` / `skip` — skip this file.
-- `apply N M` / `1 and 3 only` — apply listed; skip the rest.
-- `reword N to <X>` — apply with the user's revised text for that finding.
-- `freeze` / `ignore` — skip and queue `[[freeze]]` or `[[ignore]]`.
+**Step B** — ask once. On runtimes with an interactive question tool
+(`AskUserQuestion`), present four options: **Apply all** (recommended),
+**Review per-file**, **Skip all**, **Apply with edits**. On typed
+runtimes, the same set via typed reply (`apply all` / `review` /
+`skip all` / `apply <path>: 1 3; reword <path>: 2 to <X>; skip <path>`).
 
-Files with zero findings are not listed at all. Per-file approval is
-the iron law — no batch "apply across all files at once" affordance.
+**Step C** — interpret the reply:
+- `apply all` — apply every finding across every file; Step 6 runs.
+- `skip all` — write nothing; jump to Step 7 if config edits queued.
+- `review` — drop into the per-file fallback loop (see `report-format.md`
+  → "Per-file fallback"). Each file then takes its own
+  `yes`/`no`/`apply N M`/`reword N to <X>`/`freeze`/`ignore` reply.
+- Mixed (`apply <path>: 1 3; skip <path>; …`) — apply listed; skip the
+  rest. Acts as a one-shot selective apply without dropping to the
+  per-file loop.
+
+The consolidated report is the iron-law gate. Every proposed edit is
+visible before any write; a single `apply all` after the user has seen
+every diff IS explicit approval. Per-file approval is still available
+as the opt-in fallback for users who want surgical control.
 
 The proposed replacement for each finding is shaped by the file's
 document type (Step 1.5):
@@ -229,6 +243,11 @@ document type (Step 1.5):
 - `changelog` — append a new entry under the matching heading.
 - `tasks` — add/remove/check per the file's convention.
 
+Frozen files are excluded from the consolidated report unless
+`/context-update --override-frozen` was passed. Override mode shows
+frozen files in a separate section at the end; `apply all` does NOT
+cover them — each frozen file requires its own per-file re-confirmation.
+
 If there are zero findings, emit a one-line positive confirmation rather
 than a silent return — the user should know the check ran.
 
@@ -236,27 +255,36 @@ than a silent return — the user should know the check ran.
 
 ## Step 6 — Apply on Approval
 
-For each approved finding (from `yes`, partial selection, or revised
-reword):
+For each approved finding — from `apply all`, a mixed selective reply,
+the per-file fallback's `yes`, or a `reword` — iterate file-by-file in
+the order they appeared in the consolidated report:
 
-1. **Re-read the file.** If its content has changed since Step 3, abort this
-   finding and report `aborted: file changed since report`. Do not retry
-   without showing the new state to the user.
-2. Apply the edit per the file's document-type strategy from Step 1.5.
-   Instructions and architecture rewrite in place; changelogs append per
-   format; plans revise affected sections. Never append "Update:" / "v2:"
-   sections to non-changelog files.
+1. **Re-read the file immediately before writing.** If its content has
+   changed since Step 3, abort this file's findings and report
+   `aborted: file changed since report`. Do not retry without showing
+   the new state to the user. Continue to the next file.
+2. Apply each approved edit per the file's document-type strategy from
+   Step 1.5. Instructions and architecture rewrite in place; changelogs
+   append per format; plans revise affected sections. Never append
+   "Update:" / "v2:" sections to non-changelog files.
 3. Refuse to write to any path with `frozen = true` unless the invocation
    was `/context-update --override-frozen` AND the user explicitly
-   confirmed the override for this specific file.
-4. Print a per-file one-liner summary:
+   confirmed the override for this specific file. `apply all` does NOT
+   override frozen — those need their own per-file re-confirm after the
+   regular batch completes.
+4. After all writes, print one footer with per-file results:
 
 ```
 CLAUDE.md: 2 applied, 1 skipped
 docs/plans/api-refactor.md: 0 applied (file changed since report; re-run)
+AGENTS.md: skipped
 ```
 
-After all approvals are processed, print a single-line total.
+Then a single-line total. On Codex, each `Edit` call may trigger the
+runtime's native `apply_patch` approval dialog — that's a safety net,
+not the consent gate. Make the Edit calls back-to-back without
+intervening narration so the user can rapid-confirm what they already
+approved in the consolidated report.
 
 ---
 

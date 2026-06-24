@@ -15,8 +15,8 @@ mkdir -p "$TRANSCRIPT_DIR"
 
 # Required tokens that must appear in a GREEN transcript for any scenario.
 REQUIRED_TOKENS=(
-    "Finding"
-    "Apply?"
+    "diff"
+    "Apply all"
 )
 
 # Per-scenario extra tokens.

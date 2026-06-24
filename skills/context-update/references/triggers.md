@@ -95,7 +95,9 @@ durable preference.
 1. Read it the first time you encounter a soft-trigger pattern in a
    conversation and aren't sure whether to invoke the skill.
 2. Once you've recognized the pattern, invoke the skill — don't try
-   to fix the file inline. Per-file approval is iron law.
+   to fix the file inline. The consolidated report is the consent
+   surface; no write happens until the user has seen every diff and
+   approved.
 3. New patterns observed during testing belong in
    `rationalization-table.md` (if the agent talked itself out of
    firing) or here (if the pattern itself was novel).

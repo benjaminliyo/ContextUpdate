@@ -109,9 +109,9 @@ Format as a single readable block. No file write.
 - Does NOT scan the conversation for drift.
 - Does NOT run discovery or classification.
 - Does NOT edit any watched context file (CLAUDE.md, AGENTS.md, etc.).
-  The iron law about per-file user approval for watched files is
-  irrelevant here — this skill only touches `.contextupdate.toml`,
-  and invoking this skill IS the approval.
+  The full skill's iron law (every proposed edit visible before any
+  write) is irrelevant here — this skill only touches
+  `.contextupdate.toml`, and invoking this skill IS the approval.
 - Does NOT touch `[[freeze]]` entries. Freeze management stays in the
   full skill workflow until v0.2.
 - Does NOT guess `kind`, `owns`, or `severity` for new `[[watch]]`

@@ -5,8 +5,11 @@ working instructions for contributing to this repo.
 
 ## Iron rules
 
-- **The skill never auto-applies edits.** Every change to a watched file
-  requires explicit per-file user approval. Code review enforces this.
+- **The skill never auto-applies edits.** Every proposed change must be
+  visible to the user in the report before any write, and the user must
+  explicitly approve before the skill writes. Default flow is one
+  consolidated report → one approve-all; per-file approval is the opt-in
+  fallback when the user wants surgical control. Code review enforces this.
 - **The `description` frontmatter on SKILL.md states *when* to use the
   skill, never *what* the workflow is.** Workflow summaries in the
   description cause agents to skip the body. See

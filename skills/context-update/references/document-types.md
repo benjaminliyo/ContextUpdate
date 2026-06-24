@@ -126,5 +126,6 @@ Security per Keep-a-Changelog, or whatever convention is in use).
 - It does not change *whether* a finding exists (Step 3 is type-agnostic).
 - It only changes *how the proposed replacement is shaped* in Step 5.
 - It does not auto-reorder content beyond the per-type strategy.
-- It does not change the iron law: per-file user approval before any
-  write, regardless of type.
+- It does not change the iron law: every proposed edit visible in the
+  consolidated report before any write, regardless of type. One
+  `apply all` after seeing every diff is the explicit approval.

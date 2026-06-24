@@ -55,43 +55,40 @@ Two findings:
    classes"; user just confirmed classes for this project).
 2. `CLAUDE.md` — `aligned` (no finding emitted).
 
-## Step 5 report fragment
+## Step 5 consolidated report fragment
 
 ````markdown
-## Finding 1 — [high] contradiction
-> ⚠ outside project root — confirm scope before applying
-> changes here affect every project, not just this one
+# Context update — 1 change across 1 file
 
-**File:** `~/.claude/CLAUDE.md`
-**Category:** contradiction
-**Decision source:** turn #7 — user: "let's keep using classes here — this project is class-heavy and i want to stay consistent."
+## `~/.claude/CLAUDE.md` (1 change)
+⚠ outside project root — affects every project on your account.
+1. **coding style: classes** — add a per-project exception for class-based projects (do NOT delete the default rule).
 
-**Current text (lines 12–13):**
-```
-Avoid classes. Prefer functions and closures.
-```
-
-**Proposed replacement:**
-```
-Default: avoid classes. Prefer functions and closures.
-Exception: in projects that explicitly opt into class-based modeling,
-follow the project's style.
+```diff
+- Avoid classes. Prefer functions and closures.
++ Default: avoid classes. Prefer functions and closures.
++ Exception: in projects that explicitly opt into class-based modeling,
++ follow the project's style.
 ```
 
-**Rationale:** The user reaffirmed classes for *this* project. The personal
-instruction file should not be flipped wholesale; it should acknowledge the
-per-project exception.
-**Apply?** [ y / n / edit / skip ]
+Apply all 1 change? Reply **apply all**, **review**, or **skip all**.
+Note: 1 file (`~/.claude/CLAUDE.md`) is outside this project and affects
+every project on your account.
 ````
 
 ## Notes
 
+- Internal scaffolding (category `contradiction`, severity `high`,
+  decision-source quote from turn #7) is computed but NEVER appears in
+  user-facing output.
 - This is the canonical case for **scoped edits, not blanket overrides**:
   the user's preference is project-local, not personal-global. The proposed
   replacement adds an exception clause rather than deleting the original
   rule.
-- Because the path is outside the project root, the banner is **required**.
-- If the user replies `edit`, accept their replacement verbatim and apply
-  it. Do not "improve" it.
-- An alternative valid outcome is `skip` — the user may decide their
-  personal file should stay neutral. Skipping is not failure.
+- Because the path is outside the project root, the warning banner is
+  **required** and the out-of-project note appears in the Apply prompt.
+- If the user replies `review` and then asks for a `reword 1 to <X>`,
+  accept their replacement verbatim. Do not "improve" it.
+- An alternative valid outcome is `skip all` (or `skip <path>`) — the user
+  may decide their personal file should stay neutral. Skipping is not
+  failure.

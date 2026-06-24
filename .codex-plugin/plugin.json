@@ -25,7 +25,7 @@
   "interface": {
     "displayName": "Context Update",
     "shortDescription": "Detect drift between conversation decisions and reusable-context files",
-    "longDescription": "Use Context Update at session wrap-up, after a preference reversal, or whenever a conversation has produced decisions that may contradict statements written in CLAUDE.md, AGENTS.md, ~/.claude/CLAUDE.md, implementation plans, or personal instructions. The skill enumerates watched files, extracts conversation decisions, surfaces contradictions and stale statements, and proposes per-file edits — never auto-applying.",
+    "longDescription": "Use Context Update at session wrap-up, after a preference reversal, or whenever a conversation has produced decisions that may contradict statements written in CLAUDE.md, AGENTS.md, ~/.claude/CLAUDE.md, implementation plans, or personal instructions. The skill enumerates watched files, extracts conversation decisions, surfaces contradictions and stale statements, and proposes edits in one consolidated diff report — never auto-applying. A single `apply all` writes the approved set; per-file review is available as a fallback.",
     "developerName": "Benjamin Li",
     "capabilities": [
       "Interactive",

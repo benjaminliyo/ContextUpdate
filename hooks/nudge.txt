@@ -13,6 +13,6 @@ Watch especially for:
 - "Actually…", "from now on…", "we don't do X anymore", "I also want…"
 
 If any apply, suggest /context-update or run the context-update skill.
-Never edit a watched file without explicit per-file approval. Pure
-exploration with no decisions = no action.
+Never edit a watched file until every proposed change has been shown
+and explicitly approved. Pure exploration with no decisions = no action.
 </CONTEXT-UPDATE-REMINDER>

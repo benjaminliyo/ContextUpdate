@@ -12,7 +12,11 @@ apply.
 
 - The frontmatter rule (`description` = "Use when…" only) is
   runtime-agnostic; do not relax it for any harness.
-- The per-file approval gate is non-negotiable on every harness.
+- The "every edit visible before any write" gate is non-negotiable on
+  every harness. Whether the runtime can render the consolidated report
+  as one interactive question (Claude Code / Kimi) or only as a typed
+  prompt (Codex / Cursor / Copilot CLI / Claude.ai web), the report
+  must come first and a single approval must cover the listed diffs.
 - TOML config is parsed the same way everywhere; do not split the schema
   per runtime.
 

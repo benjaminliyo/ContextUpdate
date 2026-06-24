@@ -38,31 +38,28 @@ Turn #44, user:
   supersedes?: "jest"
 ```
 
-## Step 3 finding
+## Step 3 finding (internal)
 
 Category: `contradiction` (file asserts the opposite).
 Severity: `high` (default for contradiction, plus `kind = convention`).
 
-## Step 5 report fragment
+These are internal scaffolding and MUST NOT appear in user-facing output.
+
+## Step 5 consolidated report fragment
 
 ````markdown
-## Finding 1 — [high] contradiction
-**File:** `CLAUDE.md`
-**Category:** contradiction
-**Decision source:** turn #42 — user: "let's switch to vitest — jest is too slow on the new monorepo"
+# Context update — 1 change across 1 file
 
-**Current text (lines 82–82):**
-```
-We use jest for unit tests. Run with `npm test`.
-```
+## `CLAUDE.md` (1 change)
+1. **test runner** — switch jest to vitest in the Testing section.
 
-**Proposed replacement:**
-```
-We use vitest for unit tests. Run with `npm test`.
+```diff
+- We use jest for unit tests. Run with `npm test`.
++ We use vitest for unit tests. Run with `npm test`.
 ```
 
-**Rationale:** Conversation 2026-06-19 replaced jest with vitest project-wide.
-**Apply?** [ y / n / edit / skip ]
+Apply all 1 change? Reply **apply all** to write, **review** to step
+through file-by-file, **skip all** to write nothing.
 ````
 
 ## Notes

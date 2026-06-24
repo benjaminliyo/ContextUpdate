@@ -7,6 +7,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- **Approval flow: per-file → consolidated report → single `apply all`.**
+  Driver: testing on Codex showed that when many files needed updates,
+  the per-file `Apply?` loop trained users to skim-yes through 5+
+  prompts, which is functionally indistinguishable from auto-apply.
+  The typed prompts also didn't integrate with Codex's native UI.
+  New default: Step 5 emits one consolidated report covering every
+  file with findings, with each diff rendered inline as a fenced
+  ` ```diff ` block, then asks once — **Apply all** / **Review
+  per-file** / **Skip all** (interactive on Claude Code / Kimi, typed
+  on Codex / Cursor / Copilot / Claude.ai web). "Review per-file"
+  drops into the old loop, preserved as the opt-in fallback for
+  users who want surgical control. Frozen files are excluded from
+  `apply all` by design and still require per-file confirmation under
+  `--override-frozen`. The iron law shifts from "explicit per-file
+  approval before any write" to "every proposed edit visible in the
+  report before any write" — the safety property (no surprise
+  writes) is unchanged; the friction is removed.
+  - `CLAUDE.md` iron rule updated.
+  - `skills/context-update/SKILL.md`: Iron Law line, Step 5, Step 6,
+    UI affordances, Red Flags.
+  - `references/report-format.md`: substantially rewritten;
+    consolidated report promoted to default, per-file kept as
+    fallback section.
+  - `references/detection-workflow.md`: Steps 5 and 6 rewritten;
+    notes Codex `apply_patch` as a runtime safety net rather than
+    the consent surface.
+  - `references/rationalization-table.md`: added rows for "iron law
+    says per-file, can't batch", "skip the report, stream Edit
+    calls", "long list — apply incrementally", and "per-file is
+    clearer than one giant message".
+  - `references/config-schema.md`, `references/document-types.md`,
+    `references/triggers.md`: per-file language updated.
+  - `commands/context-update.md`, `commands/context-update-config.md`,
+    `skills/context-update-config/SKILL.md`: per-file references
+    updated.
+  - `GEMINI.md`, `CONTRIBUTING.md`, `RELEASE-NOTES.md`,
+    `docs/design-rationale.md`,
+    `docs/porting-to-other-harnesses.md`,
+    `docs/comparison-with-existing-tools.md`, `README.md`:
+    propagated.
+  - `.codex-plugin/plugin.json`, `.kimi-plugin/plugin.json`:
+    `longDescription` and Kimi `skillInstructions` updated.
+  - `hooks/nudge.txt` + `skills/context-update-nudge/SKILL.md`
+    (byte-identical): replaced "never edit without explicit per-file
+    approval" with "never edit until every proposed change has been
+    shown and explicitly approved". Nudge word count: 119 (cap 150).
+  - `tests/run-skill-tests.sh`: REQUIRED_TOKENS `Apply?` → `Apply
+    all`, added `diff`.
+  - `tests/pressure-scenarios/01-config-flip.md`: Expected section
+    updated for the new format.
+  - **Deliberately NOT touched**: `skills/context-update-project/*`
+    (slim Claude.ai web skill). Its pressure scenarios are tuned to
+    the per-file flow; the testing report was about Codex / the full
+    skill, not Claude.ai. Re-running that skill's pressure scenarios
+    is a prerequisite for propagating.
+
 ### Fixed
 - `context-update-project` now detects Project Instructions when
   Claude.ai web delivers it as the **unwrapped first message** of the

@@ -21,7 +21,8 @@ occupies a distinct niche.
 - **No code diff required.** The most damaging drift — preference
   reversal — produces no code change. Diff-based tools miss it
   structurally.
-- **Proposes per-file diffs with explicit approval.** Never auto-writes.
+- **Proposes a consolidated diff report with explicit approval.** One
+  report, every diff inline, one `apply all`. Never auto-writes.
 - **Lives at the file layer**, not inside an agent memory store. Edits
   remain auditable in git and portable across runtimes.
 

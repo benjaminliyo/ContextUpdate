@@ -344,8 +344,11 @@ directory and restart.
 - **Wrap-up nudge:** the SessionStart hook plants a self-reminder so the
   model considers running the skill before declaring a session done.
 
-The skill **never edits a watched file without your explicit per-file
-approval**.
+The skill **never edits a watched file until every proposed change has
+been shown and approved**. Default flow: one consolidated report with
+every diff inline → single `apply all`. Per-file review is the opt-in
+fallback for users who want surgical control. Frozen files are excluded
+from `apply all` and still need explicit per-file confirmation.
 
 ## Configuration
 
@@ -359,8 +362,9 @@ tool calls, `@file` mentions), preloaded context (`CLAUDE.md`,
 
 - At the watch-list prompt (Step 1), reply with `drop N`,
   `freeze N "reason"`, or `watch PATH` to prune or extend the list.
-- At each finding's `Apply?` prompt, `ignore` and `freeze` are
-  available alongside `y / n / edit / skip`.
+- At the consolidated report's Apply prompt, mixed replies like
+  `freeze <path>` or `ignore <path>` queue config changes for those
+  files while still applying the rest.
 
 The skill queues the choices and asks once at the end before writing them
 to `.contextupdate.toml` (creating it if absent).
