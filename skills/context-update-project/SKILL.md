@@ -1,6 +1,6 @@
 ---
 name: context-update-project
-description: Use when a Claude.ai conversation has produced decisions, corrections, or scope changes that may contradict the Project Instructions, Personal Preferences, or an uploaded knowledge file; when the user reverses a preference written in those surfaces; when the user asks to "update", "sync", or "fix" Project instructions; when a new decision supersedes one already in the Project text; when the assistant is about to begin coding or scaffolding after planning that diverged from the Project Instructions
+description: Use when this Claude.ai conversation contains decisions that may need to be written back to the Project Instructions, Personal Preferences, or an uploaded knowledge file. Auto-load on surface signals — phrases like "actually", "from now on", "we don't do X anymore", "I also want", "switch to", "moving forward", "I changed my mind", "scratch that"; session wrap-up like "that's it for today", "I'll stop here", "wrapping up", "going to close this Project"; explicit asks like "update / sync / refresh / fix the Project instructions"; assistant is about to scaffold code that diverges from the Project text; user self-description shifts (tenure, role, experience level). 中文同义触发: "其实", "从现在开始", "从今天开始", "改主意了", "对了忘了说", "这不只是 X 了", "我先到这", "更新 / 同步一下 Project Instructions". Do NOT auto-load on pure exploration with no decisions.
 ---
 
 # Context Update — Claude.ai Project
@@ -50,4 +50,4 @@ Zero findings → one-line confirmation. No surface visible but decisions exist 
 | "Memory mismatch counts as a finding" | Out of scope. Drop the row. |
 | "No surfaces visible — nothing to do" | Emit the missing-surface notice with detected decisions. |
 
-See `references/detection-workflow.md`, `references/discovery-rules.md`, `references/document-types.md`, `references/report-format.md`, `references/rationalization-table.md`, `references/examples/pvz-scope-drift.md`, `references/examples/junior-to-lead-tenure-drift.md`.
+See `references/detection-workflow.md`, `references/discovery-rules.md`, `references/document-types.md`, `references/report-format.md`, `references/rationalization-table.md`, `references/examples/pvz-scope-drift.md`, `references/examples/junior-to-lead-tenure-drift.md`, `references/examples/tokyo-unwrapped-pi.md`.

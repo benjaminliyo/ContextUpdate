@@ -8,6 +8,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Fixed
+- `description:` field on both `skills/context-update/SKILL.md`
+  (full) and `skills/context-update-project/SKILL.md` (Claude.ai
+  Web) rewritten to align with Claude.ai's skill-loading heuristic.
+  Previous descriptions phrased every Use-when as a self-referential
+  semantic judgment — "may contradict the Project Instructions",
+  "reverses a preference", "supersedes one already in the Project
+  text", "diverged from the Project Instructions" — which asked the
+  loading subsystem to perform the exact deep PI-vs-conversation
+  comparison that IS the skill's own workflow. Result: auto-trigger
+  was unreliable on Claude.ai Web (no SessionStart hook to fall back
+  on) and brittle on any code-agent runtime where the nudge hook
+  fails silently. New descriptions enumerate surface anchors lifted
+  from `hooks/nudge.txt` ("actually", "from now on", "we don't do X
+  anymore", "I also want", "switch to", "moving forward", "I changed
+  my mind", "scratch that"), session wrap-up signals ("that's it for
+  today", "I'll stop here", "wrapping up", "let me end this" /
+  "going to close this Project"), explicit asks ("update / sync /
+  refresh / fix the Project instructions / CLAUDE.md / AGENTS.md /
+  the project docs"), assistant-about-to-scaffold-diverging-code,
+  and user-self-description-shift. Each description also includes a
+  short row of Chinese-language synonyms (其实 / 从现在开始 /
+  从今天开始 / 改主意了 / 对了忘了说 / 这不只是 X 了 / 我先到这 /
+  更新一下) for native-language audiences. Both descriptions close
+  with "Do NOT auto-load on pure exploration with no decisions" to
+  bound greediness. Sibling `context-update-config` description was
+  audited and left untouched — it already enumerates literal trigger
+  phrases ("watch CHANGELOG.md", "ignore docs/legacy/**", etc.),
+  which is the load-heuristic-friendly pattern the workhorse skills
+  had been missing. Discovered while designing a Chinese demo: the
+  skill never auto-triggered mid-conversation even with obvious
+  anchors like "其实改主意了" / "从现在开始" in the user turn — root
+  cause was the chicken-and-egg in the description itself, not
+  anything in the hook chain or the SKILL body.
+- `dist/context-update-project-claudeai-0.1.2.zip` is now stale
+  relative to source. Rebuild via
+  `powershell -ExecutionPolicy Bypass -File scripts\build-claudeai-project-zip.ps1`
+  before re-uploading to Claude.ai. No version bump applied here —
+  release-cut decision deferred.
 - Codex auto wrap-up nudge now reaches both Codex/Windows and the
   bash-based Codex installs (macOS/Linux, untested) via **two
   SessionStart entries** in `hooks/hooks-codex.json`. The first
