@@ -8,6 +8,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Fixed
+- `context-update-project` now detects Project Instructions when
+  Claude.ai web delivers it as the **unwrapped first message** of the
+  conversation. Previous behaviour: the skill keyed off wrapper tags
+  (`<projectInstructions>`, `<claudeMd>`) and the "Codebase and user
+  instructions are shown below" preamble; on Claude.ai web there is
+  no wrapper and no preamble, so the first message was read as a
+  regular user chat turn and PI was silently skipped — even when the
+  skill could literally quote PI text, it attributed the quote to
+  "you said this this time" and asked "does this Project have
+  instructions configured?". Worse, durable PI rules (e.g. "回答控制
+  在 600 字以内") leaked into false Personal Preferences findings
+  because they looked like new ad-hoc constraints from the chat.
+  - `references/discovery-rules.md` §1: added the "Claude.ai web:
+    unwrapped first-message PI (default case)" subsection with a
+    standing-rule shape test — durable output constraints, recurring
+    scope, standing-terms identity, declarative prose without a
+    one-shot deliverable → PI; single focused time-bound ask → chat
+    turn. Plus a red flag: the revised PI block must contain ONLY the
+    PI enumerated in Step 1, never the user's actual chat turns.
+  - `references/detection-workflow.md` Step 1: added the inverse
+    demotion rule — mandatory first-message scan, enumerate as PI if
+    standing-rule shape, fall back to the "is PI configured?"
+    disambiguation prompt only if no PI candidate emerges.
+  - `references/rationalization-table.md` discovery phase: two new
+    rows covering "first message is just chat" and "asking
+    substitutes for scanning."
+  - `references/examples/tokyo-unwrapped-pi.md`: canonical fixture
+    mirroring `D:/Projects/demo1/claude-web-demo/`, including the
+    standing-rule shape check, expected Step 1/2/5 output, and the
+    RED transcript from the failing run. Linked from
+    `SKILL.md:53`.
+  - Verified working on Claude.ai web with the demo1 Tokyo fixture
+    after rebuilding and re-uploading the slim zip.
 - `description:` field on both `skills/context-update/SKILL.md`
   (full) and `skills/context-update-project/SKILL.md` (Claude.ai
   Web) rewritten to align with Claude.ai's skill-loading heuristic.
