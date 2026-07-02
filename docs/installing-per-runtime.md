@@ -14,7 +14,8 @@ the files this repo ships for each target and how to install.
 | Codex | `.codex-plugin/plugin.json` | `hooks/hooks-codex.json` | `hooks/session-end-nudge` | — |
 | Cursor | `.cursor-plugin/plugin.json` | `hooks/hooks-cursor.json` | `hooks/session-end-nudge` | — |
 | Copilot CLI | (reads `AGENTS.md` + skills dir) | reuses `hooks/hooks.json` shape | `hooks/session-end-nudge` (branches on `COPILOT_CLI=1`) | — |
-| Gemini CLI | `gemini-extension.json` + `GEMINI.md` | — | — | — |
+| Antigravity CLI | `plugin.json` + `AGENTS.md` | `hooks.json` | `hooks/session-end-nudge` / `.ps1` | — |
+| Gemini CLI (Legacy) | `gemini-extension.json` + `GEMINI.md` | — | — | — |
 | Kimi Code | `.kimi-plugin/plugin.json` | `sessionStart.skill: context-update-nudge` | `skills/context-update-nudge/SKILL.md` | — |
 | OpenCode | `.opencode/plugins/context-update.js` | (in-plugin nudge inject) | (in-plugin nudge inject) | — |
 | Pi | `.pi/extensions/context-update.ts` | (in-extension nudge inject) | (in-extension nudge inject) | — |
@@ -304,7 +305,30 @@ v1.0.8–v1.0.10 and never reached the agent).
   shape Copilot CLI expects (Copilot rejects the
   `hookSpecificOutput` wrapper that VS Code / Claude Code use).
 
-## Gemini CLI
+## Antigravity CLI (agy)
+
+- **Plugin manifest:** `plugin.json` at the repo root.
+- **Hook configuration:** `hooks.json` at the repo root (registers a `SessionStart` command-type hook).
+- **Staging path:** Staged inside `~/.gemini/antigravity-cli/plugins/context-update/`.
+- **Nudge script:** `hooks/session-end-nudge` (bash) or `hooks/session-end-nudge.ps1` (powershell) which emits the `hookSpecificOutput` JSON format containing the `<CONTEXT-UPDATE-REMINDER>` block.
+
+### Installation & Update
+Install (or update by reinstalling) the plugin:
+
+```bash
+agy plugin install /path/to/ContextUpdate
+```
+
+Verify that it is active:
+
+```bash
+agy plugin list
+```
+
+## Gemini CLI (Legacy / Enterprise only)
+
+> [!NOTE]
+> Gemini CLI was decommissioned for individual accounts on June 18, 2026. The information below is preserved for compatibility with enterprise or legacy environments.
 
 - Extension manifest: `gemini-extension.json` at the repo root.
 - Context file: `GEMINI.md` at the repo root (points at SKILL.md and

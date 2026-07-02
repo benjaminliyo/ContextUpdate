@@ -4,9 +4,10 @@ Gemini CLI entry point for the `context-update` skill. Mirrors `CLAUDE.md`
 and `AGENTS.md` so each runtime finds the working instructions under the
 filename it expects.
 
-The skill body lives at `skills/context-update/SKILL.md`. On Gemini CLI,
-load it via the standard skill-loading flow (typically from
-`~/.gemini/skills/` or `~/.agents/skills/` once this plugin is installed).
+The skill body lives at `skills/context-update/SKILL.md`. On Antigravity CLI (`agy`),
+load the plugin using `agy plugin install <path>` (which stages the skill files and sets up the session-start nudge).
+
+On the legacy, decommissioned Gemini CLI (individual accounts decommissioned June 18, 2026), skills load via the standard skill-loading flow (typically from `~/.gemini/skills/` or `~/.agents/skills/` once the plugin is installed).
 
 ## Iron rules (mirrored from CLAUDE.md)
 

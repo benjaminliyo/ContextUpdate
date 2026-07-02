@@ -1,0 +1,6 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "context-update",
+  "description": "Detect and propose edits when reusable-context files drift from decisions made in the current conversation",
+  "version": "0.1.2"
+}

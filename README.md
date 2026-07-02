@@ -177,7 +177,26 @@ nested `hookSpecificOutput` shape). The fix that makes
 [Copilot CLI v1.0.11](https://github.com/github/copilot-cli/blob/main/changelog.md)
 on 2026-03-23; earlier versions silently drop it.
 
-**Gemini CLI**
+**Antigravity CLI** (run via `agy`)
+
+Install this repository as an Antigravity plugin:
+
+```bash
+agy plugin install /path/to/ContextUpdate
+```
+
+Or install remotely:
+
+```bash
+agy plugin install https://github.com/benjaminliyo/ContextUpdate.git
+```
+
+This reads the root `plugin.json` and stages the plugin (along with the `skills/` directory and `hooks.json` for the session-start wrap-up nudge) into the global configuration directory.
+
+**Gemini CLI** (Legacy / Enterprise only)
+
+> [!NOTE]
+> Gemini CLI was decommissioned for individual accounts on June 18, 2026. These instructions remain for legacy enterprise environments.
 
 Drop the repo as a Gemini extension: it ships `gemini-extension.json`
 and `GEMINI.md` at the root. Skills load from `~/.gemini/skills/` per
@@ -314,7 +333,22 @@ pi update git:github.com/benjaminliyo/ContextUpdate      # this one only
 
 Pi's update command pulls the latest from the source ref.
 
-**Gemini CLI**
+**Antigravity CLI** (run via `agy`)
+
+Reinstall the plugin to update it to the latest version:
+
+```bash
+agy plugin install /path/to/ContextUpdate
+```
+
+Or, if you encounter staging issues, perform a clean reinstall:
+
+```bash
+agy plugin uninstall context-update
+agy plugin install /path/to/ContextUpdate
+```
+
+**Gemini CLI** (Legacy / Enterprise only)
 
 ```
 gemini extensions update context-update    # single

@@ -1,0 +1,16 @@
+{
+  "context-update-nudge": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${PLUGIN_ROOT}/hooks/session-end-nudge.ps1\"",
+        "timeoutSec": 10
+      },
+      {
+        "type": "command",
+        "command": "bash \"${PLUGIN_ROOT}/hooks/session-end-nudge\"",
+        "timeoutSec": 10
+      }
+    ]
+  }
+}
