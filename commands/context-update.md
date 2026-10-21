@@ -4,6 +4,8 @@ argument-hint: "[--override-frozen]"
 ---
 Invoke the `context-update` skill now. Run the full workflow in
 `skills/context-update/SKILL.md` against the current conversation.
+If `.contextupdate.toml` sets `[apply] mode = "auto"`, eligible edits
+are written without a prompt and shown afterward.
 
 If `--override-frozen` was passed, propose edits even for frozen paths.
 Frozen files appear in their own section at the end of the consolidated

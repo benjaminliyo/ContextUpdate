@@ -1,0 +1,8 @@
+[meta]
+version = 1
+
+[apply]
+mode = "auto"
+
+[discovery]
+include_user_global = true

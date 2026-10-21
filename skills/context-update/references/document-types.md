@@ -128,4 +128,6 @@ Security per Keep-a-Changelog, or whatever convention is in use).
 - It does not auto-reorder content beyond the per-type strategy.
 - It does not change the iron law: every proposed edit visible in the
   consolidated report before any write, regardless of type. One
-  `apply all` after seeing every diff is the explicit approval.
+  `apply all` after seeing every diff is the explicit approval. (In
+  opt-in auto mode, eligible edits are shown right after the write;
+  see `config-schema.md` → `[apply]`.)

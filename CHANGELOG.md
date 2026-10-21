@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.3] — 2026-10-20
+
+### Added
+- **Opt-in auto mode: `[apply] mode = "auto"` in `.contextupdate.toml`.**
+  Driver: users wanted drift fixed without approving every update. In
+  auto mode the agent runs the check on its own when the reminder's
+  signals fire. It writes eligible findings without a prompt, then
+  ends that same response with an auto-applied notice that shows every
+  diff and offers `undo` / `undo <path>`. Eligible means a project-root,
+  non-frozen file, an explicit quoted user decision, and no plan
+  iteration or ambiguous classification. Everything else, including
+  `~/.claude/CLAUDE.md`, goes into the normal consolidated report in the
+  same response. Step 7 config writes always ask. The default stays
+  `confirm`.
+  - `skills/context-update/SKILL.md`: Iron Law exception, Auto mode
+    paragraph, Red Flags, rationalization row. Trimmed elsewhere to
+    offset (body is about 75 words larger).
+  - `references/config-schema.md`: new `[apply]` section.
+  - `references/report-format.md`: new "Auto-applied notice" section.
+  - `references/detection-workflow.md`: "Auto mode" subsection under
+    Step 6.
+  - `references/rationalization-table.md`: new "Auto mode" phase.
+  - `skills/context-update-config/SKILL.md` +
+    `commands/context-update-config.md`: `mode auto` / `mode confirm`
+    subcommand; `list` shows the mode.
+  - `hooks/nudge.txt` + `skills/context-update-nudge/SKILL.md`
+    (byte-identical): approval line now names the auto-mode exception.
+    Nudge word count: 141 (cap 150).
+  - `CLAUDE.md`, `GEMINI.md`, `CONTRIBUTING.md`, `README.md`,
+    `docs/design-rationale.md`, `docs/comparison-with-existing-tools.md`,
+    `.codex-plugin/plugin.json`, `.kimi-plugin/plugin.json`,
+    `.contextupdate.toml.example`, `references/document-types.md`,
+    `references/triggers.md`: propagated.
+  - `tests/pressure-scenarios/04-auto-apply.md` +
+    `tests/fixtures/repo-d-auto/`: new scenario, wired into
+    `tests/run-skill-tests.sh`.
+  - Not touched: `skills/context-update-project/*`. Claude.ai web
+    can't write Project Instructions, so auto mode doesn't apply there.
+
 ### Changed
 - **Approval flow: per-file → consolidated report → single `apply all`.**
   Driver: testing on Codex showed that when many files needed updates,

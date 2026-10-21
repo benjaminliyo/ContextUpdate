@@ -6,11 +6,11 @@ description: Invoke when a conversation contains decisions that may need to be w
 # Context Update
 
 ## Overview
-Reusable-context files drift. A statement in CLAUDE.md from three weeks ago can be silently contradicted by today's conversation, and future sessions load the stale statement as current. This skill checks for drift on-demand and proposes — never auto-applies — edits, shaped by each file's document type.
+Reusable-context files drift. A statement in CLAUDE.md from three weeks ago can be silently contradicted by today's conversation, and future sessions load the stale statement as current. This skill checks for drift on-demand and proposes edits, shaped by each file's document type.
 
 **Core principle:** conversation is the source of truth for recent decisions; context files are the durable record. When they disagree, surface the disagreement.
 
-**Iron Law:** every proposed edit must be visible to the user in the report before any write, and the user must explicitly approve. Default is one consolidated report → one approve-all; per-file approval is the opt-in fallback.
+**Iron Law:** every proposed edit must be visible to the user in the report before any write, and the user must explicitly approve. Default is one consolidated report → one approve-all; per-file approval is the opt-in fallback. Sole exception: opt-in auto mode (below), where opting in is the approval and every diff is shown right after the write.
 
 ## When to Use
 - User reverses an earlier preference ("we don't do X anymore", "switch to Y")
@@ -22,7 +22,7 @@ Reusable-context files drift. A statement in CLAUDE.md from three weeks ago can 
 **Do NOT use when** the session was pure exploration with no decisions, when changes are purely code-level with no doc/convention implication, or when the file is frozen (`frozen=true` in config, or under `legacy/`).
 
 ## Core Workflow
-1. Enumerate watched files via `references/discovery-rules.md` — primarily files the conversation touched, plus preloaded context, slim probes, config, and references. Print as a one-line passive summary and proceed; only enter interactive editing (AskUserQuestion) when the user types `edit watchlist` or the list is empty / low-confidence.
+1. Enumerate watched files via `references/discovery-rules.md` — primarily files the conversation touched, plus preloaded context, slim probes, config, and references. Print a one-line passive summary and proceed; enter interactive editing only on `edit watchlist` or an empty / low-confidence list.
 1.5. Classify each file by document type (`instruction | plan | architecture | changelog | readme | tasks`) via `references/document-types.md`. Type determines whether to rewrite in place, revise affected sections, or append. Ask once on ambiguity.
 2. Extract conversation decisions as `subject — claim — supersedes?`, with the exact turn quoted.
 3. For each watched file, read fresh and classify each decision's stance: contradiction, stale, superseded, missing-new-decision, aligned.
@@ -31,7 +31,9 @@ Reusable-context files drift. A statement in CLAUDE.md from three weeks ago can 
 6. Apply approved edits in order. Re-read each file immediately before writing; abort that finding if the file changed since the report. Frozen files stay gated — `Apply all` excludes them; `--override-frozen` + per-file re-confirm is the only path in.
 7. If — and only if — Step 1 or 5 queued config edits, ask once before writing (via AskUserQuestion on runtimes that have it). No queue = no prompt.
 
-**UI affordances.** When the runtime exposes `AskUserQuestion` (Claude Code / Kimi), use it for the Apply-all prompt and the Step 7 confirm. On Codex / Cursor / Copilot CLI / Claude.ai web, fall back to the typed prompt in `references/report-format.md`. The runtime's per-write approval (e.g. Codex `apply_patch`) is a safety net, not the consent surface — the user already approved every diff once in the consolidated report.
+**Auto mode** (`[apply] mode = "auto"` in `.contextupdate.toml`; see `references/config-schema.md`). Run the workflow yourself when the reminder's signals fire, rather than suggesting it. **Eligible** findings skip Steps 5–6: re-read, write, then end that same response with the auto-applied notice (`references/report-format.md`), which shows every diff and offers `undo`. Eligible means a project-root, non-frozen file, a quoted user decision, and no plan iteration or ambiguous classification. Ineligible findings go into a normal consolidated report in that same response. Step 7 still asks.
+
+**UI affordances.** When the runtime exposes `AskUserQuestion` (Claude Code / Kimi), use it for the Apply-all prompt and the Step 7 confirm. On Codex / Cursor / Copilot CLI / Claude.ai web, fall back to the typed prompt in `references/report-format.md`. Runtime per-write approvals (e.g. Codex `apply_patch`) are a safety net, not the consent surface.
 
 ## Quick Reference
 | Conversation signal | Likely category |
@@ -47,8 +49,8 @@ Reusable-context files drift. A statement in CLAUDE.md from three weeks ago can 
 - Categorizing without quoting the contradicting turn
 - Touching a `frozen=true` path without `--override-frozen` + per-file re-confirm (frozen is the one case where batch `Apply all` does NOT cover it)
 - "I'll just fix the obvious one" — every edit must appear in the report and be approved before write
-- Calling `Edit` before the consolidated report has been shown and approved — the report is the consent surface, not a formality
-- Showing per-finding `[ y / n / edit / skip ]` prompts (deprecated — use the consolidated report's Apply-all / Review per-file / Skip-all)
+- Calling `Edit` before the consolidated report has been shown and approved — the report is the consent surface, not a formality (auto mode: eligible findings only)
+- Auto-applying without the notice in the same response
 - Treating qualitative markers ("junior", "new", "just started") in the file as aligned with quantitative facts in chat — that's `stale`, not `aligned`
 
 ## Rationalizations
@@ -56,7 +58,7 @@ Reusable-context files drift. A statement in CLAUDE.md from three weeks ago can 
 |---|---|
 | "Appending is safer" | Only changelogs append. Other types must rewrite in place — a chronicle forces every future session to reconcile. |
 | "User obviously wants this" | Obvious ≠ consented. Ask. |
-| "Auto-apply is faster" | Auto-apply is how drift becomes corruption. |
+| "Auto-apply is faster" | Only when the config sets `mode = "auto"`. Otherwise auto-apply is how drift becomes corruption. |
 | "Conversation implied it" | Implication ≠ decision. Quote the turn or skip. |
 | "Re-reading is wasteful" | Files change between turns. Re-read. |
 | "Different subjects → not a finding" | Compare on implication. Qualitative markers go `stale` against quantitative facts. |

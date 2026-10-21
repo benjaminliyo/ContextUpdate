@@ -1,7 +1,8 @@
 # ContextUpdate
 
 An agent skill that checks your reusable context files for drift against
-the *current conversation* — and proposes, never auto-applies, targeted edits.
+the *current conversation* — and proposes targeted edits for your approval
+(or, if you opt in, applies them and shows you the diffs).
 
 Reusable-context files (`CLAUDE.md`, `AGENTS.md`, `~/.claude/CLAUDE.md`,
 `docs/plans/*.md`, `.cursor/rules/*.mdc`, …) silently go stale as projects
@@ -383,6 +384,14 @@ been shown and approved**. Default flow: one consolidated report with
 every diff inline → single `apply all`. Per-file review is the opt-in
 fallback for users who want surgical control. Frozen files are excluded
 from `apply all` and still need explicit per-file confirmation.
+
+**Auto mode (opt-in).** Set `[apply] mode = "auto"` in
+`.contextupdate.toml`, or run `/context-update-config mode auto`. The
+agent then runs the check on its own when a decision drifts from a
+context file and writes the edit without asking. It ends that same
+response with every applied diff and offers `undo`. User-global files
+(`~/.claude/CLAUDE.md`), frozen files, large plan rewrites and config
+writes still go through the normal approval report.
 
 ## Configuration
 

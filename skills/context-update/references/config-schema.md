@@ -75,6 +75,39 @@ path   = "docs/legacy/*"
 reason = "historical record"
 ```
 
+## `[apply]`
+
+```toml
+[apply]
+mode = "confirm"   # confirm | auto
+```
+
+- `confirm` (default) — every proposed edit appears in the consolidated
+  report, and nothing is written until the user approves.
+- `auto` — the agent runs the drift check on its own when the session
+  reminder's signals fire. It writes **eligible** findings without
+  asking, then shows the auto-applied notice (every diff, plus `undo`)
+  at the end of the same response. Setting this is the user's standing
+  approval for those writes.
+
+A finding is eligible only when all of these hold:
+
+1. The file is inside the project root. User-global files such as
+   `~/.claude/CLAUDE.md` are never auto-written.
+2. The file is not frozen.
+3. The finding is backed by an explicit, quoted user decision (the
+   Step 2 inclusion rule, applied without exceptions).
+4. The edit is not a plan iteration, meaning it does not rewrite more
+   than about 30% of a plan.
+5. The file's document type was classified without ambiguity.
+
+Ineligible findings fall back to the normal consolidated report, shown
+in the same response as the notice. Step 7 config writes always ask.
+An unknown `mode` value is treated as `confirm`.
+
+Toggle without hand-editing: `/context-update-config mode auto` or
+`mode confirm`.
+
 ## `[[mirror]]` *(deferred to v0.2)*
 
 Reserved for synchronizing a section in one file from a source elsewhere.
@@ -144,6 +177,9 @@ path = "docs/plans/legacy/*"
 [[freeze]]
 path   = "docs/legacy/*"
 reason = "historical record"
+
+[apply]
+mode = "confirm"
 
 [discovery]
 conversation_derived        = true

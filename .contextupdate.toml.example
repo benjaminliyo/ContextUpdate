@@ -82,6 +82,22 @@ version = 1
 
 
 # ---------------------------------------------------------------------------
+# [apply]
+# How approved edits get written. Default "confirm": every proposed edit is
+# shown in one report and nothing is written until you approve.
+# "auto": the agent runs the check on its own, writes eligible edits, then
+# shows you every diff afterward and offers `undo`. Eligible means a
+# project-root, non-frozen file and an explicit decision you made in the
+# conversation. User-global files (~/.claude/CLAUDE.md), frozen files,
+# large plan rewrites and config writes still ask first.
+# Toggle with `/context-update-config mode auto` / `mode confirm`.
+# ---------------------------------------------------------------------------
+
+# [apply]
+# mode = "auto"
+
+
+# ---------------------------------------------------------------------------
 # [[mirror]]   (deferred to v0.2 — schema slot reserved)
 # Synchronize a section in one file from a source elsewhere. Parsed but
 # inert in v0.1.0.

@@ -45,6 +45,19 @@ consolidated report puts every diff in front of the user once, and
 asks once. That is the strongest version of the safety property the
 iron law was trying to enforce.
 
+### Opt-in auto mode
+
+Some users want drift fixed without being asked every time, so
+`[apply] mode = "auto"` exists for them. It changes when the user sees
+a diff, from before the write to right after it. It does not change
+whether they see it. Setting the config is the user's standing
+approval. The notice, which shows every diff in the same response and
+offers `undo`, keeps the trust property. The blast-radius property is
+kept by limiting auto writes to project-root, non-frozen files whose
+finding is backed by an explicit, quoted user decision. User-global
+files, plan iterations and config writes still go through the report.
+The default stays `confirm`.
+
 The rationalization table exists primarily to make sure agents don't
 talk themselves out of showing the report.
 

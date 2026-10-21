@@ -11,10 +11,12 @@ On the legacy, decommissioned Gemini CLI (individual accounts decommissioned Jun
 
 ## Iron rules (mirrored from CLAUDE.md)
 
-- The skill never auto-applies edits. Every proposed edit must be
+- The skill never auto-applies edits unless the user opted in. Every proposed edit must be
   visible to the user in the consolidated report before any write, and
   the user must explicitly approve. Default is one report → one
-  `apply all`; per-file review is the opt-in fallback.
+  `apply all`; per-file review is the opt-in fallback. The only
+  exception is opt-in auto mode (`[apply] mode = "auto"`), which writes
+  eligible project-root edits and then shows every diff with `undo`.
 - The frontmatter `description` on SKILL.md states *when* to use the
   skill, never *what* the workflow is.
 - Be concise; don't pad. SKILL.md body should be as short as the

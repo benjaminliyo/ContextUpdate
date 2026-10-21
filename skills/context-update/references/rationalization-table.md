@@ -77,6 +77,18 @@ by the phase of the workflow where they appear.
 | "Long list of files — I'll skip the report and just stream Edit calls; the runtime will gate them." | The runtime's per-write approval is a safety net, not the consent surface. The user has to see every diff in one place to approve meaningfully. Without the report they're rubber-stamping. |
 | "I'll apply one file first to show progress, then ask about the rest." | The report shows all files first. Splitting the approval defeats the consolidated-report design and reintroduces the per-file fatigue we just removed. |
 
+## Auto mode (`[apply] mode = "auto"`)
+
+| Excuse | Reality |
+|---|---|
+| "Auto mode is on, so `~/.claude/CLAUDE.md` is covered too." | Auto mode covers project-root files only. User-global findings go in the approval report. |
+| "Auto mode is on — I'll mention the edits at session wrap-up." | Sessions end without a wrap-up turn. The notice belongs in the same response as the write. |
+| "The diffs are small; a one-line 'updated CLAUDE.md' is enough." | Auto mode skips the prompt, not the visibility. Show every diff. |
+| "User didn't object to my suggestion, and auto mode is on — write it." | Auto writes need an explicit, quoted user decision. Inferred or assistant-only claims are dropped, same as in confirm mode. |
+| "Auto mode means I can also write the queued `.contextupdate.toml` changes." | Step 7 always asks. Auto mode covers watched-file findings only. |
+| "Auto mode is on, but I'll just suggest `/context-update` like usual." | Auto mode asks you to run the check yourself when the reminder's signals fire. Suggesting it leaves the drift in place. |
+| "The plan rewrite is big but auto mode is on." | Plan iterations (>30%) always go to the approval report. |
+
 ## Config persistence (Step 1 & Step 7)
 
 | Excuse | Reality |

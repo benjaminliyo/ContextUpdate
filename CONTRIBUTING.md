@@ -21,13 +21,15 @@
 
 - Changes to the report format (the test harness greps for tokens).
 - New top-level config blocks beyond the current schema.
-- Anything that weakens the "no auto-write" iron law.
+- Anything that weakens the "no auto-write" iron law, including widening
+  what auto mode (`[apply] mode = "auto"`) is allowed to write.
 
 ## What we will not accept
 
 - Removing the "every edit visible before any write" gate. The default
   is one consolidated report → one `apply all`, with per-file review
-  available as a fallback; removing the gate entirely is out.
+  available as a fallback; removing the gate entirely is out. Opt-in auto
+  mode is the one exception, and it must keep the after-the-fact notice.
 - Frontmatter `description` fields that summarize workflow.
 - Hidden network calls or telemetry.
 

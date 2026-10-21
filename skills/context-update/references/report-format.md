@@ -109,6 +109,46 @@ After all approved writes complete, print the footer:
 `AGENTS.md`: skipped.
 ```
 
+## Auto-applied notice (`[apply] mode = "auto"`)
+
+In auto mode, eligible findings (see `config-schema.md` → `[apply]`)
+are written without a prompt. Put the notice **at the end of the same
+response** as the writes. Don't save it for later in the session,
+because sessions often end with no wrap-up turn and the user would
+never see the notice. The notice uses the consolidated-report layout,
+with the past-tense heading below:
+
+````markdown
+# Context update — auto-applied <N> change<s> across <M> file<s>
+
+## `<path-1>` (<N1> change<s>)
+1. **<short subject>** — <one-line description>.
+
+```diff
+- <old text>
++ <new text>
+```
+
+Reply **undo** to revert all of these, or **undo <path>** for one file.
+````
+
+Rules:
+
+- Show every written diff. Auto mode skips the prompt, not the
+  visibility.
+- Report a finding aborted because the file changed since Step 3 on
+  one line (`` `<path>`: not applied — file changed; re-run ``).
+- If any findings were ineligible, append a normal consolidated report
+  for them after the notice, headed `Needs your approval —
+  <K> change<s>`, with the usual Apply-all prompt. Common reasons are
+  a file outside the project root, a frozen file, a plan iteration,
+  or an ambiguous type.
+- `undo` restores the exact pre-write text of each listed edit. Re-read
+  first, and if the file has changed since the auto-write, show the
+  current state and ask before reverting.
+- When the auto-applied notice is not followed by an approval report,
+  print no footer. The notice already serves as the footer.
+
 ## Per-file fallback (when user replies `review`)
 
 Drop into a per-file loop. For each file in the consolidated report,

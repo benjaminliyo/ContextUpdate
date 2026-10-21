@@ -97,7 +97,8 @@ durable preference.
 2. Once you've recognized the pattern, invoke the skill — don't try
    to fix the file inline. The consolidated report is the consent
    surface; no write happens until the user has seen every diff and
-   approved.
+   approved. (Opt-in auto mode writes eligible edits first and shows
+   them in the same response. See `config-schema.md` → `[apply]`.)
 3. New patterns observed during testing belong in
    `rationalization-table.md` (if the agent talked itself out of
    firing) or here (if the pattern itself was novel).

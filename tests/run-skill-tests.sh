@@ -24,6 +24,7 @@ declare -A SCENARIO_TOKENS
 SCENARIO_TOKENS["01-config-flip"]="contradiction|jest|vitest"
 SCENARIO_TOKENS["02-plan-supersession"]="superseded|error envelope"
 SCENARIO_TOKENS["03-personal-vs-project"]="contradiction|outside project root"
+SCENARIO_TOKENS["04-auto-apply"]="auto-applied|undo|vitest|outside project root"
 
 run_scenario() {
     local name="$1"
@@ -74,7 +75,7 @@ run_scenario() {
 }
 
 fail=0
-for name in 01-config-flip 02-plan-supersession 03-personal-vs-project; do
+for name in 01-config-flip 02-plan-supersession 03-personal-vs-project 04-auto-apply; do
     run_scenario "$name" || fail=$((fail+1))
 done
 

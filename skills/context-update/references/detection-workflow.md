@@ -286,6 +286,26 @@ not the consent gate. Make the Edit calls back-to-back without
 intervening narration so the user can rapid-confirm what they already
 approved in the consolidated report.
 
+### Auto mode
+
+When `.contextupdate.toml` sets `[apply] mode = "auto"`, Steps 5 and 6
+change only for **eligible** findings, which are defined in
+`config-schema.md` → `[apply]`:
+
+1. Skip the Apply prompt for those findings. Re-read each file and
+   apply the edit using the same document-type strategy. If a file
+   changed since Step 3, abort that file and report it.
+2. End the same response with the auto-applied notice
+   (`report-format.md`), which shows every diff and offers `undo`.
+3. Ineligible findings follow the normal Step 5 → Step 6 path in that
+   same response.
+
+Auto mode also changes when the skill runs. The agent invokes the
+skill on its own when the session reminder's signals fire, instead of
+suggesting `/context-update`. The Step 2 inclusion rule still applies:
+an auto-written edit needs an explicit, quoted user decision, and a
+decision the agent inferred is never enough.
+
 ---
 
 ## Step 7 — Persist queued config edits
@@ -329,7 +349,7 @@ Write these changes to .contextupdate.toml? [ y / n / edit ]
    - `edit` — user supplies a revised diff; apply it verbatim.
 
 5. **Iron law applies to config writes too.** No write without explicit
-   approval. Re-read before writing; abort if the file changed since
+   approval, even in auto mode. Re-read before writing; abort if the file changed since
    step 1.
 
 ---

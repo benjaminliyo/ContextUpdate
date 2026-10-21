@@ -35,7 +35,9 @@ Watch especially for:
 
 If any apply, suggest /context-update or run the context-update skill.
 Never edit a watched file until every proposed change has been shown
-and explicitly approved. Pure exploration with no decisions = no action.
+and explicitly approved — unless .contextupdate.toml sets
+mode = "auto": then run the skill and show every diff after writing.
+Pure exploration with no decisions = no action.
 </CONTEXT-UPDATE-REMINDER>
 
 ## What to do next

@@ -1,6 +1,6 @@
 ---
 name: context-update-config
-description: Use when the user wants to add or remove a watched or ignored file in `.contextupdate.toml` for the context-update skill without running the full drift-detection workflow; when the user types `/context-update-config` or says things like "watch CHANGELOG.md", "stop watching docs/legacy/old-plan.md", "ignore docs/legacy/**", "unignore docs/legacy/**", or "show the context-update watchlist"
+description: Use when the user wants to add or remove a watched or ignored file in `.contextupdate.toml` for the context-update skill, or turn its auto-apply mode on or off, without running the full drift-detection workflow; when the user types `/context-update-config` or says things like "watch CHANGELOG.md", "stop watching docs/legacy/old-plan.md", "ignore docs/legacy/**", "unignore docs/legacy/**", or "show the context-update watchlist", "auto-approve context updates", "stop auto-applying context updates"
 ---
 
 # Context Update — Config Editor
@@ -19,6 +19,8 @@ not auto-discover `commands/*.md`):
     /context-update-config watch drop docs/legacy/old-plan.md
     /context-update-config ignore add docs/legacy/**
     /context-update-config ignore drop docs/legacy/**
+    /context-update-config mode auto
+    /context-update-config mode confirm
 
 **Skill invocation** (runtimes that enumerate skills — Codex, Cursor,
 Kimi, OpenCode, Pi, and also Claude Code): invoke this skill by name
@@ -33,6 +35,7 @@ something equivalent in conversation):
     "ignore docs/legacy/** in context-update"
     "unignore docs/legacy/**"
     "show context-update's watchlist"
+    "let context-update apply updates automatically"
 
 All three modes route to the same logic below.
 
@@ -43,6 +46,7 @@ Read `.contextupdate.toml` and print:
 - All `[[watch]]` entries with their `kind` and `severity` if set
 - All `[[ignore]]` entries
 - All `[[freeze]]` entries with their `reason`
+- The `[apply] mode` (`confirm` if unset)
 
 If `.contextupdate.toml` does not exist, print a one-line note pointing
 to `.contextupdate.toml.example` as a template (the skill still works
@@ -91,6 +95,18 @@ Format as a single readable block. No file write.
 2. Remove the matching `[[ignore]]` entry. Preserve other blocks,
    comments, ordering.
 3. Print one-line confirmation.
+
+### `mode auto` / `mode confirm`
+1. Read `.contextupdate.toml`. If absent, create it with a `[meta]`
+   block (`version = 1`).
+2. If `[apply] mode` already has the requested value, print "already
+   <mode>" and exit. No edit.
+3. Otherwise set `mode = "<value>"` under `[apply]`. Add the `[apply]`
+   table if it is missing, and don't touch other keys or blocks.
+4. Print one-line confirmation. For `auto`, add one more line:
+   `Auto mode: context-update will write eligible project-file edits
+   without asking and show the diffs afterward. User-global and frozen
+   files still ask.`
 
 ## TOML editing rules
 

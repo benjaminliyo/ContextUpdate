@@ -22,7 +22,8 @@ occupies a distinct niche.
   reversal — produces no code change. Diff-based tools miss it
   structurally.
 - **Proposes a consolidated diff report with explicit approval.** One
-  report, every diff inline, one `apply all`. Never auto-writes.
+  report, every diff inline, one `apply all`. Auto-writes only in the
+  opt-in auto mode, and even then every diff is shown right after.
 - **Lives at the file layer**, not inside an agent memory store. Edits
   remain auditable in git and portable across runtimes.
 

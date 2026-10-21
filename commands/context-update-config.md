@@ -1,6 +1,6 @@
 ---
-description: Edit context-update's watch/ignore lists in .contextupdate.toml without running the drift-detection workflow
-argument-hint: "list | watch add <path> | watch drop <path> | ignore add <glob> | ignore drop <glob>"
+description: Edit context-update's watch/ignore lists or apply mode in .contextupdate.toml without running the drift-detection workflow
+argument-hint: "list | watch add <path> | watch drop <path> | ignore add <glob> | ignore drop <glob> | mode auto|confirm"
 ---
 
 # context-update-config
@@ -19,6 +19,8 @@ that auto-discovers `commands/*.md`):
     /context-update-config watch drop docs/legacy/old-plan.md
     /context-update-config ignore add docs/legacy/**
     /context-update-config ignore drop docs/legacy/**
+    /context-update-config mode auto
+    /context-update-config mode confirm
 
 **Skill invocation** (Codex, Cursor, Kimi, OpenCode, Pi, and also
 Claude Code): same functionality, different entry point. Every supported
@@ -40,6 +42,7 @@ something equivalent in conversation):
     "ignore docs/legacy/** in context-update"
     "unignore docs/legacy/**"
     "show context-update's watchlist"
+    "let context-update apply updates automatically"
 
 All three modes route to the same logic below — no runtime is missing
 this functionality, only the entry point differs.
@@ -51,6 +54,7 @@ Read `.contextupdate.toml` and print:
 - All `[[watch]]` entries with their `kind` and `severity` if set
 - All `[[ignore]]` entries
 - All `[[freeze]]` entries with their `reason`
+- The `[apply] mode` (`confirm` if unset)
 
 If `.contextupdate.toml` does not exist, print a one-line note pointing
 to `.contextupdate.toml.example` as a template (the skill still works
@@ -99,6 +103,18 @@ Format as a single readable block. No file write.
 2. Remove the matching `[[ignore]]` entry. Preserve other blocks,
    comments, ordering.
 3. Print one-line confirmation.
+
+### `mode auto` / `mode confirm`
+1. Read `.contextupdate.toml`. If absent, create it with a `[meta]`
+   block (`version = 1`).
+2. If `[apply] mode` already has the requested value, print "already
+   <mode>" and exit. No edit.
+3. Otherwise set `mode = "<value>"` under `[apply]`. Add the `[apply]`
+   table if it is missing, and don't touch other keys or blocks.
+4. Print one-line confirmation. For `auto`, add one more line:
+   `Auto mode: context-update will write eligible project-file edits
+   without asking and show the diffs afterward. User-global and frozen
+   files still ask.`
 
 ## TOML editing rules
 
